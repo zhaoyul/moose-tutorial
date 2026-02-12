@@ -1,0 +1,418 @@
+# 第二章：MOOSE 安装和环境配置
+
+## 2.1 系统要求
+
+### 硬件要求
+- **CPU**：x86_64 或 ARM64 架构
+- **内存**：至少 8 GB RAM（推荐 16 GB 或更多）
+- **硬盘**：至少 30 GB 可用空间
+- **并行计算**：多核 CPU 或 HPC 集群
+
+### 软件要求
+- **操作系统**：
+  - Linux（Ubuntu 20.04+, CentOS 7+, Fedora 等）
+  - macOS 10.15+
+  - Windows 10+ (通过 WSL2)
+- **编译器**：
+  - GCC 9.0.0 - 13.3.1
+  - Clang 14.0.6+
+- **Python**：3.10 或更高版本
+- **必需的 Python 包**：
+  - packaging
+  - pyyaml
+  - jinja2
+
+## 2.2 安装方法概述
+
+MOOSE 提供多种安装方法：
+
+1. **Conda 安装**（推荐新手）：最简单，适合学习
+2. **预编译二进制包**：快速开始，适合培训
+3. **Docker 容器**：环境隔离，适合快速测试
+4. **源代码编译**：完全控制，适合开发者
+
+## 2.3 方法一：使用 Conda 安装（推荐）
+
+### 2.3.1 安装 Miniconda
+
+```bash
+# 下载 Miniconda（Linux x86_64）
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+# 运行安装程序
+bash Miniconda3-latest-Linux-x86_64.sh
+
+# 按提示完成安装，重启终端
+```
+
+### 2.3.2 创建 MOOSE 环境
+
+```bash
+# 添加 conda-forge 频道
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+
+# 创建专用环境
+conda create -n moose python=3.11
+
+# 激活环境
+conda activate moose
+
+# 安装 MOOSE
+conda install moose-dev
+```
+
+### 2.3.3 验证安装
+
+```bash
+# 检查 MOOSE 版本
+moose --version
+
+# 运行测试
+cd $CONDA_PREFIX/share/moose/test
+make -j4
+./run_tests -j4
+```
+
+## 2.4 方法二：从源代码编译
+
+### 2.4.1 安装依赖
+
+#### Ubuntu/Debian
+```bash
+# 更新系统
+sudo apt-get update
+
+# 安装基本工具
+sudo apt-get install -y \
+  build-essential \
+  gfortran \
+  tcl \
+  git \
+  m4 \
+  freeglut3 \
+  doxygen \
+  libblas-dev \
+  liblapack-dev \
+  libx11-dev \
+  libnuma-dev \
+  libcurl4-openssl-dev \
+  zlib1g-dev \
+  libhwloc-dev \
+  libxml2-dev \
+  libpng-dev
+
+# 安装 Python 和包
+sudo apt-get install -y python3 python3-dev python3-pip
+pip3 install packaging pyyaml jinja2
+```
+
+#### macOS
+```bash
+# 使用 Homebrew 安装依赖
+brew install \
+  gcc \
+  open-mpi \
+  cmake \
+  python@3.11
+
+# 安装 Python 包
+pip3 install packaging pyyaml jinja2
+```
+
+### 2.4.2 克隆 MOOSE 源代码
+
+```bash
+# 创建工作目录
+mkdir -p ~/projects
+cd ~/projects
+
+# 克隆 MOOSE 仓库
+git clone https://github.com/idaholab/moose.git
+cd moose
+
+# 克隆子模块
+git submodule update --init --recursive
+```
+
+### 2.4.3 编译 PETSc
+
+```bash
+cd ~/projects/moose
+export MOOSE_DIR=$(pwd)
+
+# 设置环境变量（添加到 ~/.bashrc）
+echo "export MOOSE_DIR=$HOME/projects/moose" >> ~/.bashrc
+source ~/.bashrc
+
+# 编译 PETSc（需要 30-60 分钟）
+./scripts/update_and_rebuild_petsc.sh
+```
+
+### 2.4.4 编译 libMesh
+
+```bash
+cd $MOOSE_DIR
+
+# 编译 libMesh（需要 20-40 分钟）
+./scripts/update_and_rebuild_libmesh.sh
+```
+
+### 2.4.5 编译 MOOSE
+
+```bash
+cd $MOOSE_DIR/test
+
+# 编译（使用 4 个核心）
+make -j4
+
+# 运行测试验证
+./run_tests -j4
+```
+
+## 2.5 方法三：使用 Docker
+
+### 2.5.1 安装 Docker
+
+```bash
+# Ubuntu
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# 将用户添加到 docker 组
+sudo usermod -aG docker $USER
+
+# 重新登录以应用更改
+```
+
+### 2.5.2 拉取 MOOSE 镜像
+
+```bash
+# 拉取官方镜像
+docker pull idaholab/moose
+
+# 运行容器
+docker run -it -v $(pwd):/workspace idaholab/moose
+```
+
+## 2.6 创建第一个应用程序
+
+### 2.6.1 使用 Stork 脚本
+
+```bash
+cd ~/projects
+
+# 创建新应用（替换 MyApp 为你的应用名）
+$MOOSE_DIR/scripts/stork.sh MyApp
+
+# 进入应用目录
+cd MyApp
+
+# 查看目录结构
+tree -L 2
+```
+
+### 2.6.2 编译应用
+
+```bash
+cd ~/projects/MyApp
+
+# 编译（优化版本）
+make -j4
+
+# 编译（调试版本）
+METHOD=dbg make -j4
+```
+
+### 2.6.3 运行测试
+
+```bash
+# 运行所有测试
+./run_tests -j4
+
+# 运行特定测试
+./run_tests -i test_name
+```
+
+## 2.7 启用物理模块
+
+### 2.7.1 编辑 Makefile
+
+在应用的 `Makefile` 中启用需要的模块：
+
+```makefile
+# 启用固体力学模块
+SOLID_MECHANICS := yes
+
+# 启用热传导模块
+HEAT_CONDUCTION := yes
+
+# 启用相场模块
+PHASE_FIELD := yes
+
+# 启用张量力学模块
+TENSOR_MECHANICS := yes
+```
+
+### 2.7.2 重新编译
+
+```bash
+make -j4
+```
+
+## 2.8 配置开发环境
+
+### 2.8.1 设置环境变量
+
+添加到 `~/.bashrc` 或 `~/.zshrc`：
+
+```bash
+# MOOSE 环境变量
+export MOOSE_DIR=$HOME/projects/moose
+export PATH=$MOOSE_DIR/python/peacock:$PATH
+
+# 并行作业数
+export MOOSE_JOBS=4
+
+# 激活 conda 环境（如果使用 conda）
+# conda activate moose
+```
+
+### 2.8.2 推荐的 IDE 设置
+
+#### VS Code
+安装以下扩展：
+- C/C++ (Microsoft)
+- Python
+- MOOSE Syntax Highlighting
+
+配置文件 `.vscode/c_cpp_properties.json`：
+```json
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:MOOSE_DIR}/framework/include",
+                "${env:MOOSE_DIR}/modules/*/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
+```
+
+## 2.9 常见问题解决
+
+### 问题 1：编译失败 - 内存不足
+
+**解决方案**：减少并行作业数
+```bash
+make -j2  # 使用 2 个核心而不是 4 个
+```
+
+### 问题 2：找不到 Python 包
+
+**解决方案**：
+```bash
+pip3 install --user packaging pyyaml jinja2
+```
+
+### 问题 3：PETSc 编译错误
+
+**解决方案**：
+```bash
+cd $MOOSE_DIR/scripts
+./update_and_rebuild_petsc.sh --skip-submodule-update
+```
+
+### 问题 4：权限问题
+
+**解决方案**：
+```bash
+# 不要使用 sudo 编译 MOOSE
+# 确保目录权限正确
+chmod -R u+w ~/projects/moose
+```
+
+## 2.10 性能优化
+
+### 2.10.1 使用编译器优化
+
+```bash
+# 使用优化编译（默认）
+METHOD=opt make -j4
+
+# 使用调试编译（开发时）
+METHOD=dbg make -j4
+
+# 使用性能分析编译
+METHOD=pro make -j4
+```
+
+### 2.10.2 配置并行计算
+
+```bash
+# 使用 MPI 并行运行
+mpiexec -n 4 ./myapp-opt -i input.i
+
+# 使用线程并行
+./myapp-opt -i input.i --n-threads=4
+```
+
+## 2.11 更新 MOOSE
+
+### 定期更新
+
+```bash
+cd $MOOSE_DIR
+
+# 拉取最新代码
+git pull
+
+# 更新子模块
+git submodule update --init --recursive
+
+# 重新编译 PETSc 和 libMesh（如有需要）
+./scripts/update_and_rebuild_petsc.sh
+./scripts/update_and_rebuild_libmesh.sh
+
+# 重新编译 MOOSE
+cd test
+make -j4
+```
+
+## 2.12 练习
+
+1. **基础练习**：按照本章说明安装 MOOSE
+2. **验证练习**：成功运行 MOOSE 测试套件
+3. **创建练习**：创建并编译你的第一个应用程序
+4. **探索练习**：查看 MOOSE 目录结构，了解各个模块
+
+## 2.13 检查清单
+
+完成安装后，确保以下内容工作正常：
+
+- [ ] MOOSE 编译成功
+- [ ] 测试套件通过
+- [ ] 可以创建新应用
+- [ ] 环境变量设置正确
+- [ ] IDE 配置完成（可选）
+
+## 下一章
+
+在下一章中，我们将深入了解 MOOSE 的基本概念和架构，为编写第一个仿真程序做准备。
+
+---
+
+**参考资源**
+
+1. MOOSE Installation Guide: https://mooseframework.inl.gov/getting_started/installation/
+2. MOOSE Docker Images: https://hub.docker.com/r/idaholab/moose
+3. Troubleshooting: https://mooseframework.inl.gov/help/faq/
