@@ -4,6 +4,14 @@
 
 在本章中，我们将创建第一个完整的 MOOSE 仿真：**悬臂梁在自由端受集中载荷**。
 
+本章建议按下面顺序学习：
+
+1. 先运行仓库里已经准备好的 `examples/cantilever_beam.i`
+2. 再对照本章逐块理解输入文件
+3. 最后自己改 1 到 2 个参数，观察结果怎么变
+
+如果你是第一次接触 MOOSE，先跑通比先手写更重要。
+
 ### 4.1.1 物理模型
 
 - **几何**：长度 L = 1 m，高度 H = 0.1 m，宽度 W = 0.05 m
@@ -26,6 +34,24 @@ $$\delta = \frac{FL^3}{3EI}$$
 
 预期挠度：
 $$\delta = \frac{1000 \times 1^3}{3 \times 200 \times 10^9 \times 4.167 \times 10^{-6}} = 4.0 \times 10^{-4} \text{ m} = 0.4 \text{ mm}$$
+
+### 4.1.3 先跑通现成示例（推荐）
+
+本仓库已经提供了可直接运行的文件 [examples/cantilever_beam.i](examples/cantilever_beam.i)。第一次学习时，先不要从零手敲，先确认这个例子能跑通。
+
+```bash
+cd 04-first-example/examples
+combined-opt -i cantilever_beam.i
+```
+
+运行成功后，先检查这 4 件事：
+
+- 终端最后出现 `Finished Executing`
+- 当前目录生成 `cantilever_out.e`
+- 当前目录生成 `cantilever_out.csv`
+- `cantilever_out.csv` 里能看到 `max_disp_z` 和 `max_von_mises`
+
+如果这一步没有通过，优先回到第二章处理环境问题，不要继续往后堆新知识点。
 
 ## 4.2 创建输入文件
 
@@ -55,7 +81,7 @@ $$\delta = \frac{1000 \times 1^3}{3 \times 200 \times 10^9 \times 4.167 \times 1
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true
@@ -170,7 +196,7 @@ $$\delta = \frac{1000 \times 1^3}{3 \times 200 \times 10^9 \times 4.167 \times 1
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true
@@ -257,7 +283,7 @@ $$\delta = \frac{1000 \times 1^3}{3 \times 200 \times 10^9 \times 4.167 \times 1
   []
   
   [num_elems]
-    type = NumElems
+    type = NumElements
   []
 []
 
@@ -294,7 +320,7 @@ $$\delta = \frac{1000 \times 1^3}{3 \times 200 \times 10^9 \times 4.167 \times 1
   
   [console]
     type = Console
-    perf_log = true
+    # perf_log 已弃用
   []
 []
 ```
@@ -311,11 +337,12 @@ make -j4
 ### 4.4.2 运行
 
 ```bash
-# 单进程运行
-./myapp-opt -i cantilever_beam_force.i
+# 推荐：直接运行仓库现成示例
+cd 04-first-example/examples
+combined-opt -i cantilever_beam.i
 
-# 并行运行（4 个进程）
-mpiexec -n 4 ./myapp-opt -i cantilever_beam_force.i
+# 如果你是在自己的 MOOSE app 中复现本章，可改为：
+# ./myapp-opt -i cantilever_beam_force.i
 ```
 
 ### 4.4.3 查看输出
@@ -323,6 +350,12 @@ mpiexec -n 4 ./myapp-opt -i cantilever_beam_force.i
 运行完成后，你会看到：
 - `cantilever_out.e`：Exodus 文件（用于 Paraview）
 - `cantilever_out.csv`：CSV 文件（包含后处理数据）
+
+第一次运行时建议再多看两眼终端输出：
+
+- 是否出现了非线性收敛失败
+- 网格节点数和单元数是否与你设置的 `nx/ny/nz` 大致一致
+- 结果文件名是否与你在 `[Outputs]` 里设置的 `file_base` 一致
 
 ## 4.5 结果后处理
 
@@ -349,17 +382,28 @@ paraview cantilever_out.e
 cat cantilever_out.csv
 ```
 
-应该看到：
+你至少应该看到表头：
 ```
 time,max_disp_z,max_von_mises,num_elems,num_nodes
-0,-0.0004,3.6e+07,1000,1331
 ```
+
+对初学者来说，第一次不要死盯每一位数字，更应该看：
+
+- `max_disp_z` 是否约为 `-4e-4`
+- `max_von_mises` 是否是正值
+- `num_elems` 是否与你的网格划分一致
 
 ## 4.6 验证结果
 
 ### 4.6.1 挠度验证
 
 从 CSV 输出中，最大挠度约为 -0.0004 m = -0.4 mm，与理论解一致！
+
+这里最值得建立的直觉是：
+
+- 载荷向下，所以位移是负值
+- 梁越长、越软、越细，挠度越大
+- 如果结果数量级完全不对，优先检查单位和边界条件
 
 ### 4.6.2 应力验证
 
@@ -397,7 +441,7 @@ done
   # ... 同上 ...
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   # ... 同上 ...
 []
 
@@ -449,23 +493,36 @@ Nonlinear solve did not converge!
 
 ## 4.9 扩展练习
 
-### 练习 1：改变几何
-修改梁的尺寸，观察结果变化。
+### 练习 1：把载荷加倍，再猜结果
 
-### 练习 2：不同载荷
-- 改为均布载荷
-- 施加扭矩
-- 组合载荷
+把 `rate = -1000` 改成 `rate = -2000`，运行前先写下你的猜测：
 
-### 练习 3：不同边界条件
-- 两端简支
-- 一端固定，一端滑动
-- 三点弯曲
+- `max_disp_z` 大约会变成原来的几倍？
+- `max_von_mises` 大约会变成原来的几倍？
 
-### 练习 4：不同材料
-- 铝材（E = 70 GPa）
-- 铜材（E = 120 GPa）
-- 塑料（E = 3 GPa）
+运行后再验证。在线弹性范围内，这两个量通常都会近似翻倍。
+
+### 练习 2：把材料变软
+
+把 `youngs_modulus = 2.0e11` 改成 `1.0e11`，比较前后两次的 `max_disp_z`。
+
+这个练习的目标不是记公式，而是建立“材料越软，位移越大”的直接感觉。
+
+### 练习 3：细化网格
+
+把 `nx = 20` 改成 `40`，重新运行并比较：
+
+- `num_elems` 是否明显增加
+- `max_disp_z` 是否趋于稳定
+- 运行时间是否变长
+
+这就是最基础的网格收敛性观察。
+
+### 练习 4：改几何尺寸
+
+把梁高度 `zmax = 0.1` 改成 `0.05`，再运行一次。
+
+先猜再看结果：梁变薄后，弯曲刚度会下降，所以挠度会明显变大。
 
 ## 4.10 完整的工作流程总结
 

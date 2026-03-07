@@ -2,6 +2,18 @@
 
 系统学习 MOOSE（Multiphysics Object Oriented Simulation Environment）多物理场仿真框架的完整教程。
 
+## 👋 如果你是第一次接触 MOOSE
+
+这套教程更适合按“先跑通，再理解，再修改”的顺序来学，而不是一开始就把所有语法看完。
+
+建议你先完成下面这 3 步：
+
+1. 进入 [04-first-example](04-first-example)，直接运行现成示例 `examples/cantilever_beam.i`
+2. 确认你能看到 `cantilever_out.e` 和 `cantilever_out.csv`
+3. 再进入 [complete-simulation](complete-simulation)，先运行 `simple_demo.i` 或 `run_simulation.sh`
+
+如果你在第 1 步就卡住，不要继续往后读，先解决环境问题。对初学者来说，能稳定跑通一个最小例子比一次看懂所有章节更重要。
+
 [![MOOSE](https://mooseframework.inl.gov/static/media/moose_logo.7e94f1c9.png)](https://mooseframework.inl.gov/)
 
 ## 📚 教程目录
@@ -54,10 +66,19 @@ combined-opt -i cantilever_beam.i
 paraview cantilever_out.e
 ```
 
+第一次运行时，重点不是记住所有输入块，而是确认下面 3 件事：
+
+- 终端最后出现 `Finished Executing`
+- 目录里生成 `cantilever_out.e` 和 `cantilever_out.csv`
+- CSV 中的 `max_disp_z` 是一个负值，说明梁在 z 负方向下挠
+
 ### 运行完整仿真流程
 
 ```bash
 cd complete-simulation
+
+# 第 0 步：先跑一个更快的简化例子
+combined-opt -i simple_demo.i
 
 # 方法1: 使用 Gmsh 网格 (推荐)
 ./run_gmsh_workflow.sh
@@ -65,6 +86,14 @@ cd complete-simulation
 # 方法2: 使用内置网格
 ./run_simulation.sh
 ```
+
+如果你是第一次做完整流程，建议顺序是：
+
+1. `simple_demo.i`
+2. `run_simulation.sh`
+3. `run_gmsh_workflow.sh`
+
+这样你可以先确认 MOOSE 求解本身没有问题，再引入 Gmsh 和后处理脚本，排错会简单很多。
 
 ## 📁 项目结构
 
@@ -114,28 +143,23 @@ moose-tutorial/
 | `simple_demo.i`          | 简化版快速测试               |
 | `simple_moose_test.i`    | 最小可运行示例               |
 
-## 📊 真实 MOOSE 计算结果
+## ✅ 学习时先看哪些结果
 
-以下结果使用真实 MOOSE 框架计算得出：
+初学阶段不要急着追求和文档中的某个“固定数值”完全一致。更重要的是先判断仿真有没有按预期工作。
 
-### 示例 1: 悬臂梁集中力
+### 第一个示例的成功判据
 
-```
-最大位移: -23.93 mm
-最大应力: 631.45 MPa
-网格: 1,386 节点, 1,000 单元
-求解时间: ~5 秒
-```
+- `cantilever_out.csv` 中存在 `max_disp_z`
+- `max_disp_z` 为负，数量级约为 `1e-4 m`
+- `max_von_mises` 为正，且最大应力出现在固定端附近
 
-### 示例 2: Gmsh 网格压力载荷
+### 完整流程示例的成功判据
 
-```
-最大位移: -4.27 mm
-最大应力: 147.40 MPa
-安全系数: 1.70 ✅
-网格: 2,998 节点, 12,302 四面体
-求解时间: 10.96 秒
-```
+- 脚本执行结束时看到“完整仿真流程结束”
+- 生成 `.e`、`.csv` 和 `postprocessing_results/*_summary.txt`
+- 位移是毫米量级，应力是 MPa 到百 MPa 量级，安全系数为正值
+
+不同 MOOSE 版本、网格密度、求解器设置或载荷定义会让数值略有变化，这属于正常现象。
 
 ## 🛠️ 开发工具
 
@@ -160,6 +184,19 @@ python3 postprocess.py moose_result
 ```
 
 ## 📖 学习路径
+
+### 30 分钟入门路线
+
+如果你只想先建立直觉，可以按下面顺序完成一轮最短闭环：
+
+1. 阅读 [03-basic-concepts](03-basic-concepts) 中的 `Mesh`、`BCs`、`Executioner` 三节
+2. 运行 [04-first-example](04-first-example) 的 `examples/cantilever_beam.i`
+3. 打开 `cantilever_out.csv`，只观察 `max_disp_z` 和 `max_von_mises`
+4. 运行 `complete-simulation/simple_demo.i`
+5. 再回头看 [05-input-file-structure](05-input-file-structure) 理解输入文件结构
+
+这条路径的目标不是“学完”，而是建立一个最基本的问题闭环：
+我定义了什么物理问题，我运行了什么输入文件，我看哪几个结果判断它是否合理。
 
 ### 初学者路径
 

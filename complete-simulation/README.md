@@ -2,6 +2,14 @@
 
 本目录包含一个完整的 MOOSE 仿真流程示例，整合前序章节的所有重要特性。
 
+如果你是第一次走完整流程，不建议一上来就跑最复杂的版本。更稳妥的顺序是：
+
+1. 先运行 `simple_demo.i`
+2. 再运行 `./run_simulation.sh`
+3. 最后再尝试 `./run_gmsh_workflow.sh`
+
+这样可以把“求解器问题”“脚本问题”“网格生成问题”分开定位。
+
 ## 目录结构
 
 ```
@@ -45,6 +53,36 @@ complete-simulation/
 
 ## 使用方法
 
+### 0. 先做环境自检
+
+```bash
+cd complete-simulation
+
+# 确认 MOOSE 命令存在
+which combined-opt
+
+# 确认 Python 可用
+python3 --version
+```
+
+如果 `combined-opt` 找不到，先回到安装章节，不要直接尝试运行脚本。
+
+### 0.5 推荐先跑简化版
+
+```bash
+cd complete-simulation
+combined-opt -i simple_demo.i
+```
+
+第一次只需要确认：
+
+- 能正常结束
+- 生成 `simple_demo_out.e`
+- 生成 `simple_demo_out.csv`
+- 没有明显的收敛报错
+
+把这个最小闭环跑通之后，再进入完整自动化流程。
+
 ### 1. 快速运行
 
 ```bash
@@ -54,6 +92,13 @@ chmod +x run_simulation.sh
 # 运行完整流程（仿真 + 后处理）
 ./run_simulation.sh
 ```
+
+这个脚本会自动执行 4 个阶段：
+
+1. 检查依赖
+2. 运行 MOOSE 仿真
+3. 检查输出文件
+4. 运行后处理并生成报告
 
 ### 2. 分步运行
 
@@ -78,6 +123,16 @@ cat postprocessing_results/complete_simulation_out_summary.txt
 # （使用 PDF 阅读器打开）
 ```
 
+### 3.1 运行成功的判据
+
+第一次做完整流程时，建议只检查下面几项，不要一开始就试图读懂所有输出：
+
+- 终端出现“完整仿真流程结束”
+- 生成 `complete_simulation_out.e`
+- 生成 `complete_simulation_out.csv`
+- 生成 `postprocessing_results/complete_simulation_out_summary.txt`
+- 摘要中能看到最大应力、最大位移、安全系数
+
 ## 输入文件详解
 
 ### 完整版 (`complete_simulation.i`)
@@ -95,6 +150,8 @@ cat postprocessing_results/complete_simulation_out_summary.txt
 - 纯力学分析（无热耦合）
 - 基础后处理
 - **适合**：快速测试、学习入门
+
+对于初学者，`simple_demo.i` 是最值得反复修改的文件，因为它运行快、结构完整、改动后反馈也快。
 
 ## 后处理输出
 
@@ -165,6 +222,12 @@ postprocessing_results/
 - [ ] 后处理脚本运行成功
 - [ ] 安全系数合理（> 1.5）
 
+### 学习时的观察重点
+
+- 看 `max_disp_z` 的符号和数量级，不要只看绝对值大小
+- 看应力热点是否出现在固定端、加载区等合理位置
+- 看你改动一个参数后，结果是不是朝着符合物理直觉的方向变化
+
 ## 常见问题
 
 ### Q: 仿真运行缓慢？
@@ -188,6 +251,41 @@ pip install pandas matplotlib numpy
 - `pressure_ramp` 函数定义压力变化
 - `point_load` 的 `rate` 参数定义集中力大小
 - `gravity_z` 的 `value` 定义重力加速度
+
+### Q: 我应该先改哪个参数做实验？
+
+**A:** 推荐按下面顺序改，反馈最直接：
+
+1. `pressure_ramp` 的峰值，观察位移和应力变化
+2. `youngs_modulus`，观察结构变软或变硬
+3. `dt`，观察计算时间和输出时间点变化
+4. `nx`, `ny`, `nz`，观察网格和求解时间变化
+
+第一次实验时，每次只改一个参数，否则你很难知道结果变化是谁造成的。
+
+## 建议的互动练习
+
+### 练习 1：把压力减半
+
+把压力峰值减半，重新运行一次，比较前后两次摘要里的：
+
+- 最大位移
+- 最大应力
+- 安全系数
+
+### 练习 2：把时间步长改大
+
+把 `dt` 改大，观察运行速度是否变快，以及输出时间点是否变少。
+
+这个练习的重点是理解“求解精度”和“计算成本”之间的折中。
+
+### 练习 3：只改一个网格方向
+
+只把 `nx` 增大一倍，不改 `ny`、`nz`，观察：
+
+- 计算时间变化
+- 位移结果是否趋于稳定
+- 哪个方向的网格对结果更敏感
 
 ### Q: 如何添加新的监测点？
 
