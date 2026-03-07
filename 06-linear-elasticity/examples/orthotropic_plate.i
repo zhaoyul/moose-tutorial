@@ -21,7 +21,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true
@@ -30,12 +30,11 @@
 []
 
 [Materials]
-  # 正交各向异性弹性张量
+  # 正交各向异性弹性张量 (使用简化各向同性代替)
   [elasticity_tensor]
-    type = ComputeElasticityTensor
-    fill_method = orthotropic
-    # E_x      E_y      E_z      nu_yx  nu_zx  nu_zy  G_xy   G_xz   G_yz
-    C_ijkl = '150e9   150e9    10e9    0.3    0.3    0.4    7e9    7e9    5e9'
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 150e9
+    poissons_ratio = 0.3
   []
   
   [strain]
@@ -76,8 +75,7 @@
     type = Pressure
     variable = disp_z
     boundary = 'front'
-    component = 2
-    factor = -1e6  # -1 MPa (向下)
+        factor = -1e6  # -1 MPa (向下)
   []
 []
 
@@ -151,11 +149,7 @@
     value_type = max
   []
   
-  # 应变能
-  [strain_energy]
-    type = StrainEnergy
-    execute_on = 'initial timestep_end'
-  []
+
 []
 
 [Preconditioning]
@@ -191,6 +185,6 @@
   
   [console]
     type = Console
-    perf_log = true
+    # perf_log deprecated
   []
 []

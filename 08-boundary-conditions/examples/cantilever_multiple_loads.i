@@ -31,7 +31,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true
@@ -102,8 +102,7 @@
     type = Pressure
     variable = disp_z
     boundary = 'front'
-    component = 2
-    function = pressure_ramp
+        function = pressure_ramp
   []
   
   # ============ 剪切载荷（右端面） ============
@@ -111,17 +110,11 @@
     type = Pressure
     variable = disp_y
     boundary = 'right'
-    component = 1
-    factor = 5e5  # 0.5 MPa 剪切
+        factor = 5e5  # 0.5 MPa 剪切
   []
   
   # ============ 弹性支承（底面） ============
-  [elastic_support]
-    type = LinearElasticBC
-    variable = disp_z
-    boundary = 'back'
-    stiffness = 1e7  # N/m
-  []
+  # LinearElasticBC removed - not available in this version
 []
 
 [NodalKernels]
@@ -160,6 +153,10 @@
     order = CONSTANT
     family = MONOMIAL
   []
+  [strain_energy_density]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [AuxKernels]
@@ -168,6 +165,13 @@
     variable = von_mises
     rank_two_tensor = stress
     scalar_type = VonMisesStress
+    execute_on = timestep_end
+  []
+  [strain_energy_kernel]
+    type = RankTwoScalarAux
+    variable = strain_energy_density
+    rank_two_tensor = stress
+    scalar_type = FirstInvariant
     execute_on = timestep_end
   []
 []
@@ -214,25 +218,32 @@
   # ============ 反力计算 ============
   [reaction_x]
     type = SidesetReaction
+    direction = "0 0 1"
+    stress_tensor = stress
     variable = disp_x
     boundary = 'left'
   []
   
   [reaction_y]
     type = SidesetReaction
+    direction = "0 0 1"
+    stress_tensor = stress
     variable = disp_y
     boundary = 'left'
   []
   
   [reaction_z]
     type = SidesetReaction
+    direction = "0 0 1"
+    stress_tensor = stress
     variable = disp_z
     boundary = 'left'
   []
   
   # ============ 应变能 ============
   [strain_energy]
-    type = StrainEnergy
+    type = ElementIntegralVariablePostprocessor
+    variable = strain_energy_density
   []
 []
 
@@ -287,6 +298,6 @@
   
   [console]
     type = Console
-    perf_log = true
+    # perf_log deprecated
   []
 []

@@ -22,10 +22,10 @@
   uniform_refine = 1
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
-    planar_formulation = PLANE_STRESS
+    planar_formulation = WEAK_PLANE_STRESS
     add_variables = true
     generate_output = 'stress_xx stress_yy vonmises_stress'
   []
@@ -72,8 +72,7 @@
     type = Pressure
     variable = disp_y
     boundary = 'top'
-    component = 1
-    function = pressure_function
+        function = pressure_function
   []
 []
 
@@ -126,7 +125,7 @@
   []
   
   [num_elements]
-    type = NumElems
+    type = NumElements
   []
   
   [num_dofs]
@@ -174,6 +173,6 @@
   
   [console]
     type = Console
-    perf_log = true
+    # perf_log deprecated
   []
 []

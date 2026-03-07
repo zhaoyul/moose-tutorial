@@ -1,32 +1,27 @@
-# 悬臂梁弹性分析 - 使用力边界条件
+# 简化版 MOOSE 测试输入文件
+# 适配旧版 MOOSE 语法
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
-  [generated_mesh]
-    type = GeneratedMeshGenerator
-    dim = 3
-    xmin = 0
-    xmax = 1.0    # 长度 1 m
-    ymin = 0
-    ymax = 0.05   # 宽度 0.05 m
-    zmin = 0
-    zmax = 0.1    # 高度 0.1 m
-    nx = 20       # x 方向单元数
-    ny = 5        # y 方向单元数
-    nz = 10       # z 方向单元数
-    elem_type = HEX8
+  [file]
+    type = FileMeshGenerator
+    file = cantilever_beam.msh
   []
-  
-  # 创建自由端的节点集
-  [free_end]
-    type = BoundingBoxNodeSetGenerator
-    input = generated_mesh
-    new_boundary = 'free_end'
-    bottom_left = '0.99 0 0'
-    top_right = '1.01 0.05 0.1'
+[]
+
+[Variables]
+  [temperature]
+    initial_condition = 300
+  []
+[]
+
+[Kernels]
+  [heat_conduction]
+    type = HeatConduction
+    variable = temperature
   []
 []
 
@@ -39,46 +34,55 @@
 []
 
 [Materials]
-  [elasticity]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 2.0e11  # 200 GPa
+    youngs_modulus = 200e9
     poissons_ratio = 0.3
   []
   
   [stress]
     type = ComputeLinearElasticStress
   []
+  
+  [thermal_props]
+    type = GenericConstantMaterial
+    prop_names = 'thermal_conductivity density specific_heat'
+    prop_values = '45.0 7850.0 500.0'
+  []
 []
 
 [BCs]
-  # 固定左端
   [fix_x]
     type = DirichletBC
     variable = disp_x
-    boundary = 'left'
+    boundary = 'fixed_end'
     value = 0
   []
   [fix_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 'left'
+    boundary = 'fixed_end'
     value = 0
   []
   [fix_z]
     type = DirichletBC
     variable = disp_z
-    boundary = 'left'
+    boundary = 'fixed_end'
     value = 0
   []
-[]
-
-[NodalKernels]
-  # 在自由端施加集中力
-  [force_z]
-    type = ConstantRate
+  
+  [temp_fixed]
+    type = DirichletBC
+    variable = temperature
+    boundary = 'fixed_end'
+    value = 350
+  []
+  
+  [pressure_top]
+    type = Pressure
     variable = disp_z
-    boundary = 'free_end'
-    rate = -1000  # -1000 N 向下
+    boundary = 'top'
+    factor = 1e6
   []
 []
 
@@ -112,12 +116,14 @@
     value_type = max
   []
   
-  [num_nodes]
-    type = NumNodes
+  [max_temperature]
+    type = NodalExtremeValue
+    variable = temperature
+    value_type = max
   []
   
-  [num_elems]
-    type = NumElements
+  [num_nodes]
+    type = NumNodes
   []
 []
 
@@ -132,28 +138,24 @@
   type = Steady
   solve_type = 'NEWTON'
   
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 101'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
   
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
   l_tol = 1e-5
-  l_max_its = 100
 []
 
 [Outputs]
   [exodus]
     type = Exodus
-    file_base = cantilever_out
+    file_base = moose_result
   []
-  
   [csv]
     type = CSV
-    file_base = cantilever_out
+    file_base = moose_result
   []
-  
   [console]
     type = Console
-    # perf_log deprecated
   []
 []

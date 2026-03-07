@@ -2,7 +2,8 @@
 # 验证 Lamé 解析解
 
 [Problem]
-  coord_type = RZ  # 轴对称坐标系
+  coord_type = RZ
+  rz_coord_axis = Y  # 轴对称坐标系
 []
 
 [GlobalParams]
@@ -23,7 +24,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true
@@ -38,10 +39,7 @@
     poissons_ratio = 0.3
   []
   
-  [strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y'
-  []
+
   
   [stress]
     type = ComputeLinearElasticStress
@@ -238,6 +236,6 @@
   
   [console]
     type = Console
-    perf_log = true
+    # perf_log deprecated
   []
 []

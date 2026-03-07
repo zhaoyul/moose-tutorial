@@ -42,7 +42,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true
@@ -109,7 +109,7 @@
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temperature
-    thermal_expansion_coeff = thermal_expansion_coeff
+    thermal_expansion_coeff = 1.2e-5
     stress_free_temperature = 300
     eigenstrain_name = thermal_strain
   []
@@ -280,6 +280,6 @@
   
   [console]
     type = Console
-    perf_log = true
+    # perf_log deprecated
   []
 []

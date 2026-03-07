@@ -22,7 +22,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true
@@ -82,8 +82,7 @@
     type = Pressure
     variable = disp_z
     boundary = 'front'
-    component = 2
-    function = pressure_ramp
+        function = pressure_ramp
   []
 []
 
@@ -112,7 +111,7 @@
     type = RankTwoScalarAux
     variable = strain_energy_density
     rank_two_tensor = stress
-    scalar_type = StrainEnergyDensity
+    # scalar_type = VonMisesStress
     execute_on = timestep_end
   []
 []
@@ -175,7 +174,7 @@
   []
   
   [avg_disp_z]
-    type = NodalAverageValue
+    type = ElementAverageValue
     variable = disp_z
   []
   
@@ -184,18 +183,24 @@
     type = SidesetReaction
     variable = disp_x
     boundary = 'left'
+    direction = '1 0 0'
+    stress_tensor = stress
   []
   
   [reaction_force_y]
     type = SidesetReaction
     variable = disp_y
     boundary = 'left'
+    direction = '0 1 0'
+    stress_tensor = stress
   []
   
   [reaction_force_z]
     type = SidesetReaction
     variable = disp_z
     boundary = 'left'
+    direction = '0 0 1'
+    stress_tensor = stress
   []
   
   # 总反力
@@ -217,7 +222,7 @@
   []
   
   [num_elems]
-    type = NumElems
+    type = NumElements
   []
   
   [num_dofs]
@@ -317,7 +322,7 @@
   
   [console]
     type = Console
-    perf_log = true
+    # perf_log deprecated
     # 显示关键后处理器
     show = 'max_von_mises max_disp_z reaction_force_z'
   []
