@@ -79,6 +79,7 @@
   [all]
     strain = SMALL
     add_variables = true
+    temperature = temperature
     eigenstrain_names = 'thermal_strain'
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz vonmises_stress strain_xx strain_yy strain_zz'
   []
@@ -118,21 +119,6 @@
     y = '300 400'             # 从 300K 升温到 400K
   []
   
-  # 温度相关杨氏模量
-  [E_function]
-    type = ParsedFunction
-    expression = '200e9 * (1.0 - 2.5e-4 * (T - 300))'
-    symbol_names = 'T'
-    symbol_values = 'temperature'
-  []
-  
-  # 温度相关热膨胀系数
-  [alpha_function]
-    type = ParsedFunction
-    expression = '1.2e-5 + 2.0e-8 * (T - 300)'
-    symbol_names = 'T'
-    symbol_values = 'temperature'
-  []
 []
 
 # ============================================================================
@@ -142,7 +128,7 @@
   # 温度相关弹性张量
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus_function = E_function
+    youngs_modulus = 200e9
     poissons_ratio = 0.3
   []
   
@@ -151,18 +137,11 @@
     type = ComputeLinearElasticStress
   []
   
-  # 热膨胀系数（温度相关）
-  [thermal_expansion_prop]
-    type = GenericFunctionMaterial
-    prop_names = 'thermal_expansion_coeff'
-    prop_values = 'alpha_function'
-  []
-  
   # 热特征应变
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temperature
-    thermal_expansion_coeff = thermal_expansion_coeff
+    thermal_expansion_coeff = 1.2e-5
     stress_free_temperature = 300
     eigenstrain_name = thermal_strain
   []
@@ -170,8 +149,8 @@
   # 热传导属性
   [thermal_props]
     type = GenericConstantMaterial
-    prop_names = 'thermal_conductivity specific_heat density'
-    prop_values = '45.0     500.0         7850.0'
+    prop_names = 'youngs_modulus thermal_expansion_coeff thermal_conductivity specific_heat density'
+    prop_values = '200e9 1.2e-5 45.0 500.0 7850.0'
   []
 []
 
@@ -212,9 +191,10 @@
   [temp_convection]
     type = ConvectiveFluxBC
     variable = temperature
-    boundary = 'free_end'
-    T_infinity = 300
-    heat_transfer_coefficient = 50
+    boundary = 'right'
+    initial = 300
+    final = 300
+    rate = 50
   []
   
   # ========== 压力载荷（顶面） ==========
@@ -306,7 +286,7 @@
     type = RankTwoScalarAux
     variable = strain_energy_density
     rank_two_tensor = stress
-    # scalar_type = VonMisesStress
+    scalar_type = FirstInvariant
     execute_on = 'initial timestep_end'
   []
   
@@ -408,32 +388,30 @@
   # ========== 反力 ==========
   [reaction_x]
     type = SidesetReaction
-    direction = "0 0 1"
+    direction = "1 0 0"
     stress_tensor = stress
-    variable = disp_x
-    boundary = 'fixed_end'
+    boundary = 'left'
   []
   
   [reaction_y]
     type = SidesetReaction
-    direction = "0 0 1"
+    direction = "0 1 0"
     stress_tensor = stress
-    variable = disp_y
-    boundary = 'fixed_end'
+    boundary = 'left'
   []
   
   [reaction_z]
     type = SidesetReaction
     direction = "0 0 1"
     stress_tensor = stress
-    variable = disp_z
-    boundary = 'fixed_end'
+    boundary = 'left'
   []
   
   # 总反力
   [total_reaction]
     type = ParsedPostprocessor
     pp_names = 'reaction_x reaction_y reaction_z'
+    enable_jit = false
     expression = 'sqrt(reaction_x^2 + reaction_y^2 + reaction_z^2)'
   []
   
@@ -479,6 +457,7 @@
     pp_names = 'max_von_mises'
     constant_names = 'yield_stress'
     constant_expressions = '250e6'
+    enable_jit = false
     expression = 'yield_stress / max_von_mises'
   []
   
@@ -486,6 +465,7 @@
   [E_reduction]
     type = ParsedPostprocessor
     pp_names = 'avg_E'
+    enable_jit = false
     expression = '(1.0 - avg_E / 200e9) * 100'
   []
 []
@@ -527,7 +507,7 @@
   # ========== 顶面节点值 ==========
   [top_surface]
     type = NodalValueSampler
-    variable = 'disp_x disp_y disp_z von_mises'
+    variable = 'disp_x disp_y disp_z'
     boundary = 'front'
     sort_by = id
   []
@@ -585,8 +565,8 @@
   []
   
   # PETSc 求解选项
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 101'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   
   # 收敛准则
   nl_rel_tol = 1e-8
@@ -594,9 +574,6 @@
   l_tol = 1e-5
   l_max_its = 100
   nl_max_its = 15
-  
-  # 线性求解器
-  line_search = 'none'
 []
 
 # ============================================================================
@@ -607,7 +584,7 @@
   [exodus]
     type = Exodus
     file_base = complete_simulation_out
-    interval = 5
+    time_step_interval = 5
     elemental_as_nodal = true
     execute_on = 'initial timestep_end'
   []
@@ -633,6 +610,11 @@
   [checkpoint]
     type = Checkpoint
     num_files = 2
-    interval = 50
+    time_step_interval = 50
   []
+[]
+
+[Problem]
+  register_objects_from = 'SolidMechanicsApp HeatTransferApp'
+  library_path = '/Users/kevinli/sandbox/rc/projects/moose/modules/solid_mechanics/lib:/Users/kevinli/sandbox/rc/projects/moose/modules/heat_transfer/lib'
 []

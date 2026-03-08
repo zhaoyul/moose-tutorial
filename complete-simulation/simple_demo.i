@@ -191,7 +191,7 @@
   solve_type = 'NEWTON'
   
   start_time = 0.0
-  end_time = 2.0
+  end_time = 1.0
   dt = 0.2
   
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -217,4 +217,9 @@
     type = Console
     # perf_log deprecated
   []
+[]
+
+[Problem]
+  register_objects_from = 'SolidMechanicsApp'
+  library_path = '/Users/kevinli/sandbox/rc/projects/moose/modules/solid_mechanics/lib'
 []

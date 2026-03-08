@@ -218,17 +218,15 @@
   # ============ 反力计算 ============
   [reaction_x]
     type = SidesetReaction
-    direction = "0 0 1"
+    direction = "1 0 0"
     stress_tensor = stress
-    variable = disp_x
     boundary = 'left'
   []
   
   [reaction_y]
     type = SidesetReaction
-    direction = "0 0 1"
+    direction = "0 1 0"
     stress_tensor = stress
-    variable = disp_y
     boundary = 'left'
   []
   
@@ -236,7 +234,6 @@
     type = SidesetReaction
     direction = "0 0 1"
     stress_tensor = stress
-    variable = disp_z
     boundary = 'left'
   []
   
@@ -272,11 +269,11 @@
   
   # 时间步进设置
   start_time = 0.0
-  end_time = 2.0
-  dt = 0.1
+  end_time = 1.0
+  dt = 0.2
   
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 101'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
@@ -288,7 +285,7 @@
   [exodus]
     type = Exodus
     file_base = cantilever_multiple_loads_out
-    interval = 5
+    time_step_interval = 5
   []
   
   [csv]
@@ -300,4 +297,9 @@
     type = Console
     # perf_log deprecated
   []
+[]
+
+[Problem]
+  register_objects_from = 'SolidMechanicsApp'
+  library_path = '/Users/kevinli/sandbox/rc/projects/moose/modules/solid_mechanics/lib'
 []

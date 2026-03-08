@@ -4,6 +4,8 @@
 [Problem]
   coord_type = RZ
   rz_coord_axis = Y  # 轴对称坐标系
+  register_objects_from = 'SolidMechanicsApp'
+  library_path = '/Users/kevinli/sandbox/rc/projects/moose/modules/solid_mechanics/lib'
 []
 
 [GlobalParams]

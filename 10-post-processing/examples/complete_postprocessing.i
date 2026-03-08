@@ -111,7 +111,7 @@
     type = RankTwoScalarAux
     variable = strain_energy_density
     rank_two_tensor = stress
-    # scalar_type = VonMisesStress
+    scalar_type = FirstInvariant
     execute_on = timestep_end
   []
 []
@@ -181,7 +181,6 @@
   # ============ 反力 ============
   [reaction_force_x]
     type = SidesetReaction
-    variable = disp_x
     boundary = 'left'
     direction = '1 0 0'
     stress_tensor = stress
@@ -189,7 +188,6 @@
   
   [reaction_force_y]
     type = SidesetReaction
-    variable = disp_y
     boundary = 'left'
     direction = '0 1 0'
     stress_tensor = stress
@@ -197,7 +195,6 @@
   
   [reaction_force_z]
     type = SidesetReaction
-    variable = disp_z
     boundary = 'left'
     direction = '0 0 1'
     stress_tensor = stress
@@ -207,6 +204,7 @@
   [total_reaction]
     type = ParsedPostprocessor
     pp_names = 'reaction_force_x reaction_force_y reaction_force_z'
+    enable_jit = false
     expression = 'sqrt(reaction_force_x^2 + reaction_force_y^2 + reaction_force_z^2)'
   []
   
@@ -236,6 +234,7 @@
     pp_names = 'max_von_mises'
     constant_names = 'yield_stress'
     constant_expressions = '250e6'
+    enable_jit = false
     expression = 'yield_stress / max_von_mises'
   []
 []
@@ -295,11 +294,11 @@
   solve_type = 'NEWTON'
   
   start_time = 0.0
-  end_time = 2.0
-  dt = 0.1
+  end_time = 1.0
+  dt = 0.2
   
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
@@ -311,7 +310,7 @@
   [exodus]
     type = Exodus
     file_base = complete_postprocessing_out
-    interval = 5  # 每 5 步输出 Exodus
+    time_step_interval = 5  # 每 5 步输出 Exodus
   []
   
   [csv]
@@ -326,4 +325,9 @@
     # 显示关键后处理器
     show = 'max_von_mises max_disp_z reaction_force_z'
   []
+[]
+
+[Problem]
+  register_objects_from = 'SolidMechanicsApp'
+  library_path = '/Users/kevinli/sandbox/rc/projects/moose/modules/solid_mechanics/lib'
 []

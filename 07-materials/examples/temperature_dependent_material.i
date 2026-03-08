@@ -15,9 +15,9 @@
     ymax = 0.1    # 0.1 m
     zmin = 0
     zmax = 0.1    # 0.1 m
-    nx = 40
-    ny = 10
-    nz = 10
+    nx = 20
+    ny = 6
+    nz = 6
     elem_type = HEX8
   []
 []
@@ -34,97 +34,88 @@
     type = HeatConduction
     variable = temperature
   []
-  
-  [heat_source]
-    type = HeatSource
+
+  [heat_capacity]
+    type = SpecificHeatConductionTimeDerivative
     variable = temperature
-    value = 1e6  # W/m³
   []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
+    incremental = true
     add_variables = true
+    temperature = temperature
     eigenstrain_names = 'thermal_strain'
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
   []
 []
 
 [Functions]
-  # 温度相关杨氏模量
-  [youngs_modulus_function]
-    type = ParsedFunction
-    # E(T) = E0 * (1 - beta * (T - T0))
-    expression = '2.0e11 * (1.0 - 5.0e-4 * (T - 300))'
-    symbol_names = 'T'
-    symbol_values = 'temperature'
-  []
-  
-  # 温度相关热膨胀系数
+  # 温度相关热膨胀系数，函数自变量是温度
   [alpha_function]
     type = ParsedFunction
-    # alpha(T) = a0 + a1*T
-    expression = '1.0e-5 + 1.0e-8 * T'
-    symbol_names = 'T'
-    symbol_values = 'temperature'
+    expression = '1.0e-5 + 1.0e-8 * t'
   []
-  
-  # 温度相关热导率
-  [k_function]
-    type = ParsedFunction
-    expression = '50.0 - 0.01 * (T - 300)'
-    symbol_names = 'T'
-    symbol_values = 'temperature'
+
+  # 右端温度从室温逐步升高到 600 K
+  [right_temperature]
+    type = PiecewiseLinear
+    x = '0 10'
+    y = '300 600'
   []
 []
 
 [Materials]
-  # 温度相关弹性张量
-  [elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    youngs_modulus_function = youngs_modulus_function
-    poissons_ratio = 0.3
+  [youngs_modulus]
+    type = DerivativeParsedMaterial
+    property_name = youngs_modulus
+    coupled_variables = temperature
+    enable_jit = false
+    expression = '2.0e11 * (1.0 - 5.0e-4 * (temperature - 300))'
   []
-  
-  # 应变计算
-  [strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
+
+  [poissons_ratio]
+    type = DerivativeParsedMaterial
+    property_name = poissons_ratio
+    coupled_variables = temperature
+    enable_jit = false
+    expression = '0.3'
+  []
+
+  [elasticity_tensor]
+    type = ComputeVariableIsotropicElasticityTensor
+    youngs_modulus = youngs_modulus
+    poissons_ratio = poissons_ratio
+    args = temperature
   []
   
   # 应力计算
   [stress]
-    type = ComputeLinearElasticStress
+    type = ComputeFiniteStrainElasticStress
+  []
+
+  [thermal_expansion_coeff]
+    type = DerivativeParsedMaterial
+    property_name = thermal_expansion_coeff
+    coupled_variables = temperature
+    enable_jit = false
+    expression = '1.0e-5 + 1.0e-8 * temperature'
   []
   
-  # 温度相关热膨胀系数
-  [thermal_expansion]
-    type = GenericFunctionMaterial
-    prop_names = 'thermal_expansion_coeff'
-    prop_values = 'alpha_function'
-  []
-  
-  # 热特征应变
   [thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
+    type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
     temperature = temperature
-    thermal_expansion_coeff = 1.2e-5
+    thermal_expansion_function = alpha_function
     stress_free_temperature = 300
     eigenstrain_name = thermal_strain
   []
   
-  # 热传导材料属性
-  [thermal_conductivity]
-    type = GenericFunctionMaterial
-    prop_names = 'thermal_conductivity'
-    prop_values = 'k_function'
-  []
-  
   [density]
     type = GenericConstantMaterial
-    prop_names = 'density specific_heat'
-    prop_values = '7850   500'  # kg/m³, J/(kg·K)
+    prop_names = 'thermal_conductivity density specific_heat'
+    prop_values = '50 7850 500'  # W/(m·K), kg/m³, J/(kg·K)
   []
 []
 
@@ -159,13 +150,12 @@
     value = 300
   []
   
-  # 右端对流散热
+  # 右端逐步升温，驱动温度相关材料响应
   [convection_right]
-    type = ConvectiveFluxBC
+    type = FunctionDirichletBC
     variable = temperature
     boundary = 'right'
-    T_infinity = 300
-    heat_transfer_coefficient = 100  # W/(m²·K)
+    function = right_temperature
   []
 []
 
@@ -255,14 +245,18 @@
 []
 
 [Executioner]
-  type = Steady
-  solve_type = 'NEWTON'
+  type = Transient
+  solve_type = 'PJFNK'
+  start_time = 0
+  end_time = 10.0
+  dt = 1.0
   
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 101'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
+  nl_max_its = 30
   l_tol = 1e-5
   l_max_its = 100
 []
@@ -282,4 +276,9 @@
     type = Console
     # perf_log deprecated
   []
+[]
+
+[Problem]
+  register_objects_from = 'SolidMechanicsApp HeatTransferApp'
+  library_path = '/Users/kevinli/sandbox/rc/projects/moose/modules/solid_mechanics/lib:/Users/kevinli/sandbox/rc/projects/moose/modules/heat_transfer/lib'
 []

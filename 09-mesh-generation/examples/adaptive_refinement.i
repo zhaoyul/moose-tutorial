@@ -2,7 +2,7 @@
 # 演示基于误差指示器的自适应细化
 
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
@@ -25,7 +25,7 @@
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
-    planar_formulation = WEAK_PLANE_STRESS
+    planar_formulation = PLANE_STRAIN
     add_variables = true
     generate_output = 'stress_xx stress_yy vonmises_stress'
   []
@@ -175,4 +175,9 @@
     type = Console
     # perf_log deprecated
   []
+[]
+
+[Problem]
+  register_objects_from = 'SolidMechanicsApp'
+  library_path = '/Users/kevinli/sandbox/rc/projects/moose/modules/solid_mechanics/lib'
 []

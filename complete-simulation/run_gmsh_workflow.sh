@@ -11,6 +11,9 @@
 
 set -e  # 出错时退出
 
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+POSTPROCESS_AVAILABLE=1
+
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -22,8 +25,8 @@ NC='\033[0m' # No Color
 # 配置
 MESH_FILE="cantilever_beam.msh"
 GEO_FILE="cantilever_beam.geo"
-INPUT_FILE="simulation_with_gmsh.i"
-OUTPUT_PREFIX="gmsh_simulation_out"
+INPUT_FILE="${INPUT_FILE:-simple_moose_test.i}"
+OUTPUT_PREFIX="${OUTPUT_PREFIX:-moose_result}"
 POSTPROCESS_SCRIPT="postprocess.py"
 
 # 默认参数
@@ -76,16 +79,13 @@ check_dependencies() {
         exit 1
     fi
     
-    # 检查 MOOSE
-    if command -v combined-opt &> /dev/null; then
-        MOOSE_CMD="combined-opt"
-        print_success "找到 MOOSE: combined-opt"
-    elif command -v moose-opt &> /dev/null; then
-        MOOSE_CMD="moose-opt"
-        print_success "找到 MOOSE: moose-opt"
+    # 检查本地 MOOSE 入口
+    if [ -x "$ROOT_DIR/run_moose_local.sh" ]; then
+        MOOSE_CMD="$ROOT_DIR/run_moose_local.sh"
+        print_success "找到 MOOSE 入口脚本: $MOOSE_CMD"
     else
-        print_warning "未找到 MOOSE 应用"
-        MOOSE_CMD=""
+        print_error "未找到 MOOSE 入口脚本: $ROOT_DIR/run_moose_local.sh"
+        exit 1
     fi
     
     # 检查 Python
@@ -98,6 +98,13 @@ check_dependencies() {
         exit 1
     fi
     print_success "找到 Python: $PYTHON_CMD"
+
+    if $PYTHON_CMD -c "import pandas, matplotlib, numpy" 2>/dev/null; then
+        print_success "Python 后处理依赖已就绪"
+    else
+        POSTPROCESS_AVAILABLE=0
+        print_warning "缺少 pandas/matplotlib/numpy，后处理步骤将被跳过"
+    fi
 }
 
 # =============================================================================
@@ -176,13 +183,6 @@ check_mesh() {
 run_simulation() {
     print_header "Step 3: 运行 MOOSE 仿真"
     
-    if [ -z "$MOOSE_CMD" ]; then
-        print_warning "未找到 MOOSE，跳过仿真步骤"
-        print_info "你可以稍后手动运行:"
-        echo "  combined-opt -i $INPUT_FILE"
-        return 0
-    fi
-    
     if [ ! -f "$INPUT_FILE" ]; then
         print_error "输入文件不存在: $INPUT_FILE"
         exit 1
@@ -192,7 +192,7 @@ run_simulation() {
     print_info "开始计算..."
     
     # 运行仿真
-    $MOOSE_CMD -i "$INPUT_FILE" 2>&1 | tee simulation.log
+    "$MOOSE_CMD" -i "$INPUT_FILE" 2>&1 | tee simulation.log
     
     if [ ${PIPESTATUS[0]} -eq 0 ]; then
         print_success "仿真计算完成"
@@ -207,6 +207,11 @@ run_simulation() {
 # =============================================================================
 run_postprocess() {
     print_header "Step 4: 运行后处理"
+
+    if [ "$POSTPROCESS_AVAILABLE" -ne 1 ]; then
+        print_warning "跳过后处理：Python 依赖未就绪"
+        return 0
+    fi
     
     # 检查输出文件
     if [ ! -f "${OUTPUT_PREFIX}.csv" ]; then
@@ -224,12 +229,10 @@ run_postprocess() {
     
     if [ -f "$POSTPROCESS_SCRIPT" ]; then
         print_info "执行后处理脚本..."
-        $PYTHON_CMD "$POSTPROCESS_SCRIPT" "$OUTPUT_PREFIX"
-        
-        if [ $? -eq 0 ]; then
+        if $PYTHON_CMD "$POSTPROCESS_SCRIPT" "$OUTPUT_PREFIX"; then
             print_success "后处理完成"
         else
-            print_error "后处理失败"
+            print_warning "后处理失败，保留仿真结果供 ParaView 使用"
         fi
     else
         print_warning "未找到后处理脚本: $POSTPROCESS_SCRIPT"

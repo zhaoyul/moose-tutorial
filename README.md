@@ -219,13 +219,13 @@ python3 postprocess.py moose_result
 
 本教程已更新适配 MOOSE 新版语法：
 
-| 旧语法 | 新语法 |
-|--------|--------|
+| 旧语法                           | 新语法                               |
+|----------------------------------|--------------------------------------|
 | `Modules/TensorMechanics/Master` | `Physics/SolidMechanics/QuasiStatic` |
-| `NodalAverageValue` | `ElementAverageValue` |
-| `NumElems` | `NumElements` |
-| `PLANE_STRESS` | `WEAK_PLANE_STRESS` |
-| `component = 2` (Pressure BC) | 移除 |
+| `NodalAverageValue`              | `ElementAverageValue`                |
+| `NumElems`                       | `NumElements`                        |
+| `PLANE_STRESS`                   | `WEAK_PLANE_STRESS`                  |
+| `component = 2` (Pressure BC)    | 移除                                 |
 
 所有示例已修复并验证可运行。
 

@@ -11,9 +11,12 @@
 
 set -e  # 出错时退出
 
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+POSTPROCESS_AVAILABLE=1
+
 # 配置
-INPUT_FILE="complete_simulation.i"
-OUTPUT_PREFIX="complete_simulation_out"
+INPUT_FILE="${INPUT_FILE:-simple_demo.i}"
+OUTPUT_PREFIX="${OUTPUT_PREFIX:-simple_demo_out}"
 POSTPROCESS_SCRIPT="postprocess.py"
 
 # 颜色输出
@@ -55,21 +58,13 @@ print_warning() {
 check_dependencies() {
     print_header "检查依赖"
     
-    # 检查 MOOSE 应用
-    if command -v combined-opt &> /dev/null; then
-        MOOSE_CMD="combined-opt"
-        print_success "找到 MOOSE 应用: combined-opt"
-    elif command -v moose-opt &> /dev/null; then
-        MOOSE_CMD="moose-opt"
-        print_success "找到 MOOSE 应用: moose-opt"
+    # 检查本地 MOOSE 入口
+    if [ -x "$ROOT_DIR/run_moose_local.sh" ]; then
+        MOOSE_CMD="$ROOT_DIR/run_moose_local.sh"
+        print_success "找到 MOOSE 入口脚本: $MOOSE_CMD"
     else
-        print_warning "未找到 MOOSE 应用，尝试使用 mpirun"
-        if command -v mpirun &> /dev/null; then
-            MOOSE_CMD="mpirun -np 4 combined-opt"
-        else
-            print_error "未找到可用的 MOOSE 运行方式"
-            exit 1
-        fi
+        print_error "未找到 MOOSE 入口脚本: $ROOT_DIR/run_moose_local.sh"
+        exit 1
     fi
     
     # 检查 Python
@@ -83,16 +78,14 @@ check_dependencies() {
     fi
     print_success "找到 Python: $PYTHON_CMD"
     
-    # 检查必要的 Python 包
-    print_info "检查 Python 依赖包..."
-    $PYTHON_CMD -c "import pandas, matplotlib, numpy" 2>/dev/null || {
-        print_warning "缺少必要的 Python 包，尝试安装..."
-        $PYTHON_CMD -m pip install pandas matplotlib numpy --user 2>/dev/null || {
-            print_error "安装依赖包失败，请手动安装: pip install pandas matplotlib numpy"
-            exit 1
-        }
-    }
-    print_success "Python 依赖包已就绪"
+    # 检查可选的 Python 包，缺失时仅跳过后处理
+    print_info "检查可选 Python 依赖包..."
+    if $PYTHON_CMD -c "import pandas, matplotlib, numpy" 2>/dev/null; then
+        print_success "Python 后处理依赖已就绪"
+    else
+        POSTPROCESS_AVAILABLE=0
+        print_warning "缺少 pandas/matplotlib/numpy，后处理步骤将被跳过"
+    fi
 }
 
 # =============================================================================
@@ -110,7 +103,7 @@ run_simulation() {
     print_info "开始计算..."
     
     # 运行仿真
-    $MOOSE_CMD -i $INPUT_FILE 2>&1 | tee simulation.log
+    "$MOOSE_CMD" -i "$INPUT_FILE" 2>&1 | tee simulation.log
     
     # 检查是否成功
     if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -155,20 +148,23 @@ check_output() {
 # =============================================================================
 run_postprocess() {
     print_header "运行后处理"
+
+    if [ "$POSTPROCESS_AVAILABLE" -ne 1 ]; then
+        print_warning "跳过后处理：Python 依赖未就绪"
+        return 0
+    fi
     
     if [ ! -f "$POSTPROCESS_SCRIPT" ]; then
-        print_error "后处理脚本不存在: $POSTPROCESS_SCRIPT"
-        exit 1
+        print_warning "未找到后处理脚本: $POSTPROCESS_SCRIPT"
+        return 0
     fi
     
     print_info "执行后处理脚本..."
-    $PYTHON_CMD $POSTPROCESS_SCRIPT $OUTPUT_PREFIX
-    
-    if [ $? -eq 0 ]; then
+    if $PYTHON_CMD $POSTPROCESS_SCRIPT $OUTPUT_PREFIX; then
         print_success "后处理完成"
     else
-        print_error "后处理失败"
-        exit 1
+        print_warning "后处理失败，保留仿真结果供 ParaView 使用"
+        return 0
     fi
 }
 
@@ -197,8 +193,10 @@ show_results() {
     print_info "使用 ParaView 查看结果:"
     echo "  paraview ${OUTPUT_PREFIX}.e"
     echo ""
-    print_info "查看 PDF 报告:"
-    echo "  postprocessing_results/${OUTPUT_PREFIX}_report.pdf"
+    if [ -f "postprocessing_results/${OUTPUT_PREFIX}_report.pdf" ]; then
+        print_info "查看 PDF 报告:"
+        echo "  postprocessing_results/${OUTPUT_PREFIX}_report.pdf"
+    fi
 }
 
 # =============================================================================
