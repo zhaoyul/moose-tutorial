@@ -1,12 +1,12 @@
-# 第五章：MOOSE 输入文件结构详解
+* 第五章：MOOSE 输入文件结构详解
 
-## 5.1 输入文件概述
+** 5.1 输入文件概述
 
 MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩展名通常为 `.i`。
 
-### 5.1.1 基本语法
+*** 5.1.1 基本语法
 
-```cpp
+#+begin_src cpp
 [BlockName]
   parameter1 = value1
   parameter2 = value2
@@ -15,26 +15,26 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     sub_parameter = sub_value
   []
 []
-```
+#+end_src
 
-### 5.1.2 注释
+*** 5.1.2 注释
 
-```cpp
+#+begin_src cpp
 # 这是单行注释
 
 [Mesh]
   type = GeneratedMesh  # 行尾注释
   dim = 3               # 三维网格
 []
-```
+#+end_src
 
-## 5.2 主要块结构
+** 5.2 主要块结构
 
-### 5.2.1 必需块
+*** 5.2.1 必需块
 
 以下是最小可运行输入文件的必需块：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   # 网格定义
 []
@@ -58,11 +58,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
 [Outputs]
   # 输出控制
 []
-```
+#+end_src
 
-### 5.2.2 可选但常用的块
+*** 5.2.2 可选但常用的块
 
-```cpp
+#+begin_src cpp
 [Materials]        # 材料属性
 [AuxVariables]     # 辅助变量
 [AuxKernels]       # 辅助核
@@ -70,26 +70,26 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
 [Postprocessors]   # 后处理器
 [Preconditioning]  # 预条件器
 [GlobalParams]     # 全局参数
-```
+#+end_src
 
-## 5.3 GlobalParams 块
+** 5.3 GlobalParams 块
 
 定义在多处使用的全局参数，避免重复。
 
-```cpp
+#+begin_src cpp
 [GlobalParams]
   # 在整个输入文件中共享的参数
   displacements = 'disp_x disp_y disp_z'
   order = FIRST
   family = LAGRANGE
 []
-```
+#+end_src
 
-## 5.4 Mesh 块详解
+** 5.4 Mesh 块详解
 
-### 5.4.1 生成网格
+*** 5.4.1 生成网格
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [generated]
     type = GeneratedMeshGenerator
@@ -106,22 +106,22 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     elem_type = HEX8  # HEX8, HEX20, HEX27, TET4, TET10, etc.
   []
 []
-```
+#+end_src
 
-### 5.4.2 导入网格
+*** 5.4.2 导入网格
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = FileMesh
   file = 'mesh.e'      # Exodus II 格式
   # file = 'mesh.msh'  # Gmsh 格式
   # file = 'mesh.inp'  # Abaqus 格式
 []
-```
+#+end_src
 
-### 5.4.3 网格修改
+*** 5.4.3 网格修改
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [base_mesh]
     type = GeneratedMeshGenerator
@@ -147,13 +147,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     new_boundary = 'interface'
   []
 []
-```
+#+end_src
 
-## 5.5 Variables 块详解
+** 5.5 Variables 块详解
 
-### 5.5.1 标准变量定义
+*** 5.5.1 标准变量定义
 
-```cpp
+#+begin_src cpp
 [Variables]
   [temperature]
     order = FIRST      # CONSTANT, FIRST, SECOND, THIRD, FOURTH
@@ -167,11 +167,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     scaling = 1e-6  # 变量缩放，改善条件数
   []
 []
-```
+#+end_src
 
-### 5.5.2 向量变量
+*** 5.5.2 向量变量
 
-```cpp
+#+begin_src cpp
 [Variables]
   # 使用 TensorMechanics Master Action 自动创建
   # 或手动定义：
@@ -182,13 +182,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
   [disp_z]
   []
 []
-```
+#+end_src
 
-## 5.6 Kernels 块详解
+** 5.6 Kernels 块详解
 
-### 5.6.1 内置 Kernels
+*** 5.6.1 内置 Kernels
 
-```cpp
+#+begin_src cpp
 [Kernels]
   # 扩散项
   [diffusion]
@@ -209,11 +209,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     value = 1000  # W/m³
   []
 []
-```
+#+end_src
 
-### 5.6.2 固体力学 Kernels
+*** 5.6.2 固体力学 Kernels
 
-```cpp
+#+begin_src cpp
 [Kernels]
   [stress_divergence_x]
     type = StressDivergenceTensors
@@ -236,13 +236,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     displacements = 'disp_x disp_y disp_z'
   []
 []
-```
+#+end_src
 
-## 5.7 Materials 块详解
+** 5.7 Materials 块详解
 
-### 5.7.1 材料属性
+*** 5.7.1 材料属性
 
-```cpp
+#+begin_src cpp
 [Materials]
   # 各向同性弹性
   [elasticity_tensor]
@@ -270,11 +270,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     prop_values = '7850'  # kg/m³
   []
 []
-```
+#+end_src
 
-### 5.7.2 温度相关材料
+*** 5.7.2 温度相关材料
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity]
     type = ComputeIsotropicElasticityTensor
@@ -292,13 +292,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     symbol_values = 'temperature'
   []
 []
-```
+#+end_src
 
-## 5.8 BCs 块详解
+** 5.8 BCs 块详解
 
-### 5.8.1 Dirichlet 边界条件
+*** 5.8.1 Dirichlet 边界条件
 
-```cpp
+#+begin_src cpp
 [BCs]
   # 固定值
   [fixed]
@@ -324,11 +324,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     value = 0
   []
 []
-```
+#+end_src
 
-### 5.8.2 Neumann 边界条件
+*** 5.8.2 Neumann 边界条件
 
-```cpp
+#+begin_src cpp
 [BCs]
   # 热通量
   [heat_flux]
@@ -347,11 +347,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     factor = 1e6  # Pa
   []
 []
-```
+#+end_src
 
-### 5.8.3 Robin 边界条件
+*** 5.8.3 Robin 边界条件
 
-```cpp
+#+begin_src cpp
 [BCs]
   # 对流边界条件
   [convection]
@@ -362,13 +362,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     heat_transfer_coefficient = 100  # W/(m²·K)
   []
 []
-```
+#+end_src
 
-## 5.9 Executioner 块详解
+** 5.9 Executioner 块详解
 
-### 5.9.1 稳态求解器
+*** 5.9.1 稳态求解器
 
-```cpp
+#+begin_src cpp
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'  # NEWTON, PJFNK, JFNK, FD
@@ -385,11 +385,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
-```
+#+end_src
 
-### 5.9.2 瞬态求解器
+*** 5.9.2 瞬态求解器
 
-```cpp
+#+begin_src cpp
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
@@ -414,13 +414,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
   nl_abs_tol = 1e-8
   l_tol = 1e-4
 []
-```
+#+end_src
 
-## 5.10 Outputs 块详解
+** 5.10 Outputs 块详解
 
-### 5.10.1 基本输出
+*** 5.10.1 基本输出
 
-```cpp
+#+begin_src cpp
 [Outputs]
   exodus = true   # Exodus II 格式
   csv = true      # CSV 格式
@@ -448,11 +448,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     print_mesh_changed_info = true
   []
 []
-```
+#+end_src
 
-### 5.10.2 Checkpoint 输出
+*** 5.10.2 Checkpoint 输出
 
-```cpp
+#+begin_src cpp
 [Outputs]
   # 用于重启计算
   [checkpoint]
@@ -461,13 +461,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     interval = 100     # 每 100 步保存
   []
 []
-```
+#+end_src
 
-## 5.11 Functions 块详解
+** 5.11 Functions 块详解
 
-### 5.11.1 解析函数
+*** 5.11.1 解析函数
 
-```cpp
+#+begin_src cpp
 [Functions]
   # 解析表达式
   [parsed_function]
@@ -477,11 +477,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     symbol_values = '1000 6.28 0.5'
   []
 []
-```
+#+end_src
 
-### 5.11.2 分段函数
+*** 5.11.2 分段函数
 
-```cpp
+#+begin_src cpp
 [Functions]
   # 分段线性
   [piecewise_linear]
@@ -501,11 +501,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     direction = 'right'
   []
 []
-```
+#+end_src
 
-## 5.12 Preconditioning 块详解
+** 5.12 Preconditioning 块详解
 
-```cpp
+#+begin_src cpp
 [Preconditioning]
   [SMP]
     type = SMP  # Single Matrix Preconditioner
@@ -522,11 +522,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
   #   full = true
   # []
 []
-```
+#+end_src
 
-## 5.13 Postprocessors 块详解
+** 5.13 Postprocessors 块详解
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   # 节点极值
   [max_temperature]
@@ -561,13 +561,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     boundary = 'right'
   []
 []
-```
+#+end_src
 
-## 5.14 高级特性
+** 5.14 高级特性
 
-### 5.14.1 向量后处理器
+*** 5.14.1 向量后处理器
 
-```cpp
+#+begin_src cpp
 [VectorPostprocessors]
   [line_data]
     type = LineValueSampler
@@ -578,13 +578,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     sort_by = id
   []
 []
-```
+#+end_src
 
-### 5.14.2 MultiApps
+*** 5.14.2 MultiApps
 
 用于多尺度和多物理场耦合：
 
-```cpp
+#+begin_src cpp
 [MultiApps]
   [sub_app]
     type = TransientMultiApp
@@ -603,13 +603,13 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
     variable = temperature
   []
 []
-```
+#+end_src
 
-## 5.15 输入文件组织最佳实践
+** 5.15 输入文件组织最佳实践
 
-### 5.15.1 使用 !include
+*** 5.15.1 使用 !include
 
-```cpp
+#+begin_src cpp
 # main.i
 [Mesh]
   !include mesh.i
@@ -618,11 +618,11 @@ MOOSE 输入文件使用分层的块结构，采用 "GetPot" 格式，文件扩�
 [Variables]
   !include variables.i
 []
-```
+#+end_src
 
-### 5.15.2 参数化
+*** 5.15.2 参数化
 
-```cpp
+#+begin_src cpp
 # 在文件顶部定义参数
 L = 10
 W = 5
@@ -644,22 +644,22 @@ E = 200e9
     poissons_ratio = 0.3
   []
 []
-```
+#+end_src
 
-### 5.15.3 命令行参数
+*** 5.15.3 命令行参数
 
-```bash
+#+begin_src bash
 # 运行时覆盖参数
 ./app-opt -i input.i \
   Mesh/gen/xmax=20 \
   Materials/elasticity/youngs_modulus=250e9
-```
+#+end_src
 
-## 5.16 调试技巧
+** 5.16 调试技巧
 
-### 5.16.1 检查输入文件
+*** 5.16.1 检查输入文件
 
-```bash
+#+begin_src bash
 # 验证输入文件语法
 ./app-opt -i input.i --check-input
 
@@ -668,11 +668,11 @@ E = 200e9
 
 # 仅显示输出
 ./app-opt -i input.i --show-outputs
-```
+#+end_src
 
-### 5.16.2 详细输出
+*** 5.16.2 详细输出
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [console]
     type = Console
@@ -680,16 +680,16 @@ E = 200e9
     output_linear = true       # 输出线性残差
   []
 []
-```
+#+end_src
 
-## 5.17 练习
+** 5.17 练习
 
 1. **基础练习**：创建一个包含所有必需块的最小输入文件
 2. **修改练习**：修改第四章的例子，使用不同的边界条件
 3. **参数化练习**：创建参数化输入文件，通过命令行改变参数
 4. **组织练习**：将大型输入文件拆分为多个文件
 
-## 5.18 检查清单
+** 5.18 检查清单
 
 - [ ] 理解基本块结构
 - [ ] 知道如何定义变量和材料
@@ -698,7 +698,7 @@ E = 200e9
 - [ ] 会配置输出选项
 - [ ] 能够使用函数和后处理器
 
-## 下一章
+** 下一章
 
 下一章将深入讨论线性弹性问题，包括各向异性材料和复杂几何。
 

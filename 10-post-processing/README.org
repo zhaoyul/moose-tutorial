@@ -1,8 +1,8 @@
-# 第十章：后处理和可视化
+* 第十章：后处理和可视化
 
-## 10.1 后处理概述
+** 10.1 后处理概述
 
-### 10.1.1 后处理的目的
+*** 10.1.1 后处理的目的
 
 - **结果验证**：检查解的合理性
 - **数据提取**：获取关键数值（最大应力、位移等）
@@ -10,7 +10,7 @@
 - **报告生成**：为工程报告准备图表和数据
 - **趋势分析**：研究参数影响和时间历史
 
-### 10.1.2 MOOSE 后处理工具
+*** 10.1.2 MOOSE 后处理工具
 
 **内置工具**：
 - Postprocessors：标量值计算
@@ -24,9 +24,9 @@
 - **Gnuplot**：快速绘图
 - **Visit**：科学可视化
 
-## 10.2 Postprocessors
+** 10.2 Postprocessors
 
-### 10.2.1 概念
+*** 10.2.1 概念
 
 Postprocessors 计算标量值，如：
 - 极值（最大/最小）
@@ -35,11 +35,11 @@ Postprocessors 计算标量值，如：
 - 反力
 - 误差估计
 
-### 10.2.2 极值 Postprocessors
+*** 10.2.2 极值 Postprocessors
 
 **节点极值**：
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   [max_temperature]
     type = NodalExtremeValue
@@ -53,11 +53,11 @@ Postprocessors 计算标量值，如：
     value_type = min
   []
 []
-```
+#+end_src
 
 **单元极值**：
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   [max_von_mises]
     type = ElementExtremeValue
@@ -71,11 +71,11 @@ Postprocessors 计算标量值，如：
     value_type = max
   []
 []
-```
+#+end_src
 
 **边界极值**：
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   [max_boundary_stress]
     type = NodalExtremeValue
@@ -84,13 +84,13 @@ Postprocessors 计算标量值，如：
     value_type = max
   []
 []
-```
+#+end_src
 
-### 10.2.3 积分 Postprocessors
+*** 10.2.3 积分 Postprocessors
 
 **体积积分**：
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   # 变量的体积积分
   [total_strain_energy]
@@ -104,11 +104,11 @@ Postprocessors 计算标量值，如：
     mat_prop = density
   []
 []
-```
+#+end_src
 
 **面积积分**：
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   # 边界上的积分
   [total_force]
@@ -125,11 +125,11 @@ Postprocessors 计算标量值，如：
     diffusivity = thermal_conductivity
   []
 []
-```
+#+end_src
 
-### 10.2.4 平均值 Postprocessors
+*** 10.2.4 平均值 Postprocessors
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   # 单元平均
   [avg_temperature]
@@ -150,11 +150,11 @@ Postprocessors 计算标量值，如：
     variable = disp_z
   []
 []
-```
+#+end_src
 
-### 10.2.5 反力计算
+*** 10.2.5 反力计算
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   [reaction_force_x]
     type = SidesetReaction
@@ -181,13 +181,13 @@ Postprocessors 计算标量值，如：
     expression = 'sqrt(reaction_force_x^2 + reaction_force_y^2 + reaction_force_z^2)'
   []
 []
-```
+#+end_src
 
-### 10.2.6 组合 Postprocessors
+*** 10.2.6 组合 Postprocessors
 
 使用已有 Postprocessors 计算新值：
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   [stress_xx_max]
     type = ElementExtremeValue
@@ -217,11 +217,11 @@ Postprocessors 计算标量值，如：
     expression = 'yield_stress / combined_stress'
   []
 []
-```
+#+end_src
 
-## 10.3 VectorPostprocessors
+** 10.3 VectorPostprocessors
 
-### 10.3.1 概念
+*** 10.3.1 概念
 
 VectorPostprocessors 计算向量/矩阵数据：
 - 沿线采样
@@ -229,9 +229,9 @@ VectorPostprocessors 计算向量/矩阵数据：
 - 时间历史数据
 - 统计分布
 
-### 10.3.2 线采样
+*** 10.3.2 线采样
 
-```cpp
+#+begin_src cpp
 [VectorPostprocessors]
   [line_sample]
     type = LineValueSampler
@@ -242,11 +242,11 @@ VectorPostprocessors 计算向量/矩阵数据：
     sort_by = x  # x, y, z, id
   []
 []
-```
+#+end_src
 
 **多条线采样**：
 
-```cpp
+#+begin_src cpp
 [VectorPostprocessors]
   [lines_y]
     type = LineValueSampler
@@ -261,11 +261,11 @@ VectorPostprocessors 计算向量/矩阵数据：
     sort_by = id
   []
 []
-```
+#+end_src
 
-### 10.3.3 面采样
+*** 10.3.3 面采样
 
-```cpp
+#+begin_src cpp
 [VectorPostprocessors]
   [surface_sample]
     type = PointValueSampler
@@ -279,11 +279,11 @@ VectorPostprocessors 计算向量/矩阵数据：
     sort_by = id
   []
 []
-```
+#+end_src
 
-### 10.3.4 节点值采样
+*** 10.3.4 节点值采样
 
-```cpp
+#+begin_src cpp
 [VectorPostprocessors]
   [nodal_values]
     type = NodalValueSampler
@@ -292,11 +292,11 @@ VectorPostprocessors 计算向量/矩阵数据：
     sort_by = id
   []
 []
-```
+#+end_src
 
-### 10.3.5 时间历史
+*** 10.3.5 时间历史
 
-```cpp
+#+begin_src cpp
 [VectorPostprocessors]
   [time_history]
     type = PointValueSampler
@@ -305,11 +305,11 @@ VectorPostprocessors 计算向量/矩阵数据：
     execute_on = 'initial timestep_end'
   []
 []
-```
+#+end_src
 
-### 10.3.6 统计分布
+*** 10.3.6 统计分布
 
-```cpp
+#+begin_src cpp
 [VectorPostprocessors]
   [stress_distribution]
     type = ElementVariablesDifferenceMax
@@ -317,15 +317,15 @@ VectorPostprocessors 计算向量/矩阵数据：
     variable2 = stress_yy
   []
 []
-```
+#+end_src
 
-## 10.4 输出格式
+** 10.4 输出格式
 
-### 10.4.1 Exodus II 格式
+*** 10.4.1 Exodus II 格式
 
 最常用的格式，用于 Paraview 可视化：
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [exodus]
     type = Exodus
@@ -336,11 +336,11 @@ VectorPostprocessors 计算向量/矩阵数据：
     execute_on = 'initial timestep_end'
   []
 []
-```
+#+end_src
 
 **输出特定变量**：
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [exodus]
     type = Exodus
@@ -350,13 +350,13 @@ VectorPostprocessors 计算向量/矩阵数据：
     hide = 'intermediate_variable'
   []
 []
-```
+#+end_src
 
-### 10.4.2 CSV 格式
+*** 10.4.2 CSV 格式
 
 输出 Postprocessors 和 VectorPostprocessors 数据：
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [csv]
     type = CSV
@@ -364,11 +364,11 @@ VectorPostprocessors 计算向量/矩阵数据：
     execute_on = 'initial timestep_end'
   []
 []
-```
+#+end_src
 
 **分离输出**：
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [pp_csv]
     type = CSV
@@ -382,11 +382,11 @@ VectorPostprocessors 计算向量/矩阵数据：
     execute_vector_postprocessors_on = 'initial timestep_end'
   []
 []
-```
+#+end_src
 
-### 10.4.3 控制台输出
+*** 10.4.3 控制台输出
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [console]
     type = Console
@@ -396,13 +396,13 @@ VectorPostprocessors 计算向量/矩阵数据：
     print_mesh_changed_info = true
   []
 []
-```
+#+end_src
 
-### 10.4.4 Checkpoint 输出
+*** 10.4.4 Checkpoint 输出
 
 用于重启计算：
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [checkpoint]
     type = Checkpoint
@@ -410,29 +410,29 @@ VectorPostprocessors 计算向量/矩阵数据：
     interval = 100     # 每 100 步保存
   []
 []
-```
+#+end_src
 
-### 10.4.5 Nemesis 格式
+*** 10.4.5 Nemesis 格式
 
 并行计算的分布式输出：
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [nemesis]
     type = Nemesis
     file_base = results
   []
 []
-```
+#+end_src
 
-## 10.5 Paraview 可视化
+** 10.5 Paraview 可视化
 
-### 10.5.1 Paraview 基础
+*** 10.5.1 Paraview 基础
 
 **启动 Paraview**：
-```bash
+#+begin_src bash
 paraview results.e
-```
+#+end_src
 
 **基本操作**：
 1. 打开文件：File → Open
@@ -440,7 +440,7 @@ paraview results.e
 3. 选择变量：在左侧面板选择
 4. 调整显示：工具栏中的显示选项
 
-### 10.5.2 常用滤镜
+*** 10.5.2 常用滤镜
 
 **切片（Slice）**：
 1. Filters → Slice
@@ -455,13 +455,13 @@ paraview results.e
 4. Apply
 
 **变形显示（Warp by Vector）**：
-```
+#+begin_src
 显示位移场：
 1. Filters → Warp By Vector
 2. Vector: displacement
 3. Scale Factor: 调整放大倍数
 4. Apply
-```
+#+end_src
 
 **裁剪（Clip）**：
 1. Filters → Clip
@@ -470,16 +470,16 @@ paraview results.e
 4. Apply
 
 **计算器（Calculator）**：
-```
+#+begin_src
 计算新变量：
 1. Filters → Calculator
 2. Result Array Name: 输入新变量名
 3. Expression: 输入公式
    例如：sqrt(stress_xx^2 + stress_yy^2 + stress_zz^2)
 4. Apply
-```
+#+end_src
 
-### 10.5.3 时间动画
+*** 10.5.3 时间动画
 
 **创建动画**：
 1. View → Animation View
@@ -488,42 +488,42 @@ paraview results.e
 4. File → Save Animation
 
 **保存截图**：
-```
+#+begin_src
 File → Save Screenshot
 选择分辨率和格式
-```
+#+end_src
 
-### 10.5.4 高级可视化
+*** 10.5.4 高级可视化
 
 **矢量场（Glyph）**：
-```
+#+begin_src
 1. Filters → Glyph
 2. Glyph Type: Arrow
 3. Scale Mode: vector
 4. Scale Factor: 调整箭头大小
 5. Apply
-```
+#+end_src
 
 **流线（Stream Tracer）**：
-```
+#+begin_src
 1. Filters → Stream Tracer
 2. Seed Type: Point Source
 3. 设置种子点
 4. Apply
-```
+#+end_src
 
 **体渲染（Volume Rendering）**：
-```
+#+begin_src
 1. 选择 3D 数据
 2. 在显示属性中选择 "Volume"
 3. 调整传递函数
-```
+#+end_src
 
-### 10.5.5 Python 脚本自动化
+*** 10.5.5 Python 脚本自动化
 
 Paraview 支持 Python 脚本：
 
-```python
+#+begin_src python
 # paraview_script.py
 from paraview.simple import *
 
@@ -544,18 +544,18 @@ colorbar.Title = 'Von Mises Stress (Pa)'
 
 # 保存图像
 SaveScreenshot('stress_plot.png', view, ImageResolution=[1920, 1080])
-```
+#+end_src
 
 运行：
-```bash
+#+begin_src bash
 pvpython paraview_script.py
-```
+#+end_src
 
-## 10.6 数据分析（Python）
+** 10.6 数据分析（Python）
 
-### 10.6.1 读取 CSV 数据
+*** 10.6.1 读取 CSV 数据
 
-```python
+#+begin_src python
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -572,11 +572,11 @@ plt.title('Stress History', fontsize=14)
 plt.grid(True)
 plt.savefig('stress_history.png', dpi=300)
 plt.show()
-```
+#+end_src
 
-### 10.6.2 读取 VectorPostprocessor 数据
+*** 10.6.2 读取 VectorPostprocessor 数据
 
-```python
+#+begin_src python
 # 读取线采样数据
 line_data = pd.read_csv('results_line_sample_0001.csv')
 
@@ -589,11 +589,11 @@ plt.legend()
 plt.grid(True)
 plt.savefig('displacement_profile.png', dpi=300)
 plt.show()
-```
+#+end_src
 
-### 10.6.3 多时间步分析
+*** 10.6.3 多时间步分析
 
-```python
+#+begin_src python
 import glob
 
 # 读取所有时间步的数据
@@ -611,11 +611,11 @@ plt.legend()
 plt.grid(True)
 plt.savefig('stress_evolution.png', dpi=300)
 plt.show()
-```
+#+end_src
 
-### 10.6.4 统计分析
+*** 10.6.4 统计分析
 
-```python
+#+begin_src python
 # 计算统计量
 stats = {
     'mean': pp_data['max_von_mises'].mean(),
@@ -636,21 +636,21 @@ plt.ylabel('Frequency')
 plt.title('Stress Distribution')
 plt.savefig('stress_histogram.png', dpi=300)
 plt.show()
-```
+#+end_src
 
-## 10.7 使用 Exodus II Python 库
+** 10.7 使用 Exodus II Python 库
 
-### 10.7.1 安装
+*** 10.7.1 安装
 
-```bash
+#+begin_src bash
 pip install netCDF4
 # 或
 conda install -c conda-forge netcdf4
-```
+#+end_src
 
-### 10.7.2 读取 Exodus 文件
+*** 10.7.2 读取 Exodus 文件
 
-```python
+#+begin_src python
 from netCDF4 import Dataset
 import numpy as np
 import matplotlib.pyplot as plt
@@ -684,13 +684,13 @@ plt.title('Displacement Field')
 plt.axis('equal')
 plt.savefig('displacement_contour.png', dpi=300)
 plt.show()
-```
+#+end_src
 
-## 10.8 报告生成
+** 10.8 报告生成
 
-### 10.8.1 自动化报告
+*** 10.8.1 自动化报告
 
-```python
+#+begin_src python
 # generate_report.py
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -744,11 +744,11 @@ def generate_report(csv_file, output_pdf):
 
 # 使用
 generate_report('results.csv', 'analysis_report.pdf')
-```
+#+end_src
 
-### 10.8.2 LaTeX 表格生成
+*** 10.8.2 LaTeX 表格生成
 
-```python
+#+begin_src python
 # 生成 LaTeX 表格
 def create_latex_table(data):
     latex = "\\begin{table}[h]\n"
@@ -769,17 +769,17 @@ def create_latex_table(data):
 
 data = pd.read_csv('results.csv')
 print(create_latex_table(data))
-```
+#+end_src
 
-## 10.9 实用工具
+** 10.9 实用工具
 
-### 10.9.1 MOOSE 的 peacock
+*** 10.9.1 MOOSE 的 peacock
 
 图形界面工具：
 
-```bash
+#+begin_src bash
 peacock -i input.i
-```
+#+end_src
 
 功能：
 - 输入文件编辑
@@ -787,60 +787,60 @@ peacock -i input.i
 - 运行模拟
 - 结果可视化
 
-### 10.9.2 MOOSEDocs 工具
+*** 10.9.2 MOOSEDocs 工具
 
-```bash
+#+begin_src bash
 # 生成文档
 ./moosedocs.py build --serve
 
 # 查看语法
 ./moosedocs.py syntax MyApp
-```
+#+end_src
 
-## 10.10 完整示例
+** 10.10 完整示例
 
 参见 `examples/complete_postprocessing.i`
 
-## 10.11 练习
+** 10.11 练习
 
-### 练习 1：基本后处理
+*** 练习 1：基本后处理
 设置完整的后处理：
 - 多个 Postprocessors
 - 线采样
 - 反力计算
 - CSV 输出
 
-### 练习 2：Paraview 可视化
+*** 练习 2：Paraview 可视化
 使用 Paraview：
 - 创建应力云图
 - 添加变形显示
 - 制作时间动画
 - 保存高质量图像
 
-### 练习 3：Python 数据分析
+*** 练习 3：Python 数据分析
 编写 Python 脚本：
 - 读取 CSV 数据
 - 绘制多个图表
 - 计算统计量
 - 生成报告
 
-### 练习 4：对比分析
+*** 练习 4：对比分析
 比较多个工况：
 - 运行多个算例
 - 提取关键结果
 - 绘制对比图
 - 分析差异
 
-### 练习 5：自动化工作流
+*** 练习 5：自动化工作流
 创建完整自动化流程：
 - 运行模拟
 - 提取数据
 - 生成图表
 - 创建 PDF 报告
 
-## 10.12 最佳实践
+** 10.12 最佳实践
 
-### 10.12.1 后处理检查清单
+*** 10.12.1 后处理检查清单
 
 - [ ] 验证结果合理性（数量级、趋势）
 - [ ] 检查守恒量（能量、质量等）
@@ -850,7 +850,7 @@ peacock -i input.i
 - [ ] 记录关键结果和图表
 - [ ] 保存原始数据和脚本
 
-### 10.12.2 可视化技巧
+*** 10.12.2 可视化技巧
 
 - 使用合适的颜色映射
 - 添加清晰的标签和单位
@@ -859,7 +859,7 @@ peacock -i input.i
 - 使用切片查看内部场
 - 保存高分辨率图像用于出版
 
-### 10.12.3 数据管理
+*** 10.12.3 数据管理
 
 - 组织文件结构
 - 使用描述性文件名
@@ -867,7 +867,7 @@ peacock -i input.i
 - 版本控制输入文件
 - 备份重要结果
 
-## 10.13 小结
+** 10.13 小结
 
 本章详细介绍了后处理和可视化：
 
@@ -878,7 +878,7 @@ peacock -i input.i
 - ✓ 自动化报告生成
 - ✓ 最佳实践和工作流程
 
-## 下一章
+** 下一章
 
 下一章将讨论非线性问题的求解，包括材料非线性和几何非线性。
 

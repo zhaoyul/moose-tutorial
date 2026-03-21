@@ -1,8 +1,8 @@
-# 第七章：材料属性定义
+* 第七章：材料属性定义
 
-## 7.1 材料系统概述
+** 7.1 材料系统概述
 
-### 7.1.1 MOOSE 材料框架
+*** 7.1.1 MOOSE 材料框架
 
 MOOSE 的材料系统负责：
 - 定义材料属性（密度、弹性模量、热导率等）
@@ -10,17 +10,17 @@ MOOSE 的材料系统负责：
 - 管理材料状态变量
 - 处理材料的历史相关行为
 
-### 7.1.2 材料属性的计算流程
+*** 7.1.2 材料属性的计算流程
 
-```
+#+begin_src
 初始化 → 计算材料属性 → 计算残差和雅可比 → 更新状态
     ↑                                           ↓
     └───────────────────时间步进─────────────────┘
-```
+#+end_src
 
-### 7.1.3 材料对象的组织
+*** 7.1.3 材料对象的组织
 
-```cpp
+#+begin_src cpp
 [Materials]
   # 材料属性按计算顺序组织
   [elasticity_tensor]
@@ -35,17 +35,17 @@ MOOSE 的材料系统负责：
     # 最后计算应力
   []
 []
-```
+#+end_src
 
 MOOSE 自动解析依赖关系并按正确顺序计算。
 
-## 7.2 基本材料属性
+** 7.2 基本材料属性
 
-### 7.2.1 常数材料属性
+*** 7.2.1 常数材料属性
 
 **单一属性**：
 
-```cpp
+#+begin_src cpp
 [Materials]
   [density]
     type = GenericConstantMaterial
@@ -53,11 +53,11 @@ MOOSE 自动解析依赖关系并按正确顺序计算。
     prop_values = '7850'  # kg/m³ (钢)
   []
 []
-```
+#+end_src
 
 **多个属性**：
 
-```cpp
+#+begin_src cpp
 [Materials]
   [physical_properties]
     type = GenericConstantMaterial
@@ -65,15 +65,15 @@ MOOSE 自动解析依赖关系并按正确顺序计算。
     prop_values = '7850   50.0              500'
   []
 []
-```
+#+end_src
 
-### 7.2.2 函数材料属性
+*** 7.2.2 函数材料属性
 
 材料属性可以是时间、空间或其他变量的函数。
 
 **时间相关**：
 
-```cpp
+#+begin_src cpp
 [Functions]
   [youngs_modulus_function]
     type = PiecewiseLinear
@@ -89,11 +89,11 @@ MOOSE 自动解析依赖关系并按正确顺序计算。
     poissons_ratio = 0.3
   []
 []
-```
+#+end_src
 
 **空间相关**：
 
-```cpp
+#+begin_src cpp
 [Functions]
   [spatial_modulus]
     type = ParsedFunction
@@ -110,11 +110,11 @@ MOOSE 自动解析依赖关系并按正确顺序计算。
     prop_values = 'spatial_modulus'
   []
 []
-```
+#+end_src
 
-## 7.3 温度依赖材料
+** 7.3 温度依赖材料
 
-### 7.3.1 温度相关弹性模量
+*** 7.3.1 温度相关弹性模量
 
 许多材料的弹性模量随温度变化：
 
@@ -122,7 +122,7 @@ $$E(T) = E_0 [1 - \beta(T - T_0)]$$
 
 **方法 1：使用 ParsedFunction**
 
-```cpp
+#+begin_src cpp
 [Variables]
   [temperature]
     initial_condition = 300
@@ -145,11 +145,11 @@ $$E(T) = E_0 [1 - \beta(T - T_0)]$$
     poissons_ratio = 0.3
   []
 []
-```
+#+end_src
 
 **方法 2：使用 PiecewiseLinear（从数据）**
 
-```cpp
+#+begin_src cpp
 [Functions]
   [E_vs_T]
     type = PiecewiseLinear
@@ -168,10 +168,10 @@ $$E(T) = E_0 [1 - \beta(T - T_0)]$$
     poissons_ratio = 0.3
   []
 []
-```
+#+end_src
 
 数据文件格式（`E_temperature_data.csv`）：
-```
+#+begin_src
 # Temperature(K), Youngs_Modulus(Pa)
 273, 210e9
 373, 205e9
@@ -179,11 +179,11 @@ $$E(T) = E_0 [1 - \beta(T - T_0)]$$
 573, 195e9
 673, 190e9
 773, 185e9
-```
+#+end_src
 
-### 7.3.2 温度相关泊松比
+*** 7.3.2 温度相关泊松比
 
-```cpp
+#+begin_src cpp
 [Functions]
   [poisson_temp]
     type = PiecewiseLinear
@@ -212,15 +212,15 @@ $$E(T) = E_0 [1 - \beta(T - T_0)]$$
     prop_values = 'poisson_temp'
   []
 []
-```
+#+end_src
 
-### 7.3.3 热膨胀系数
+*** 7.3.3 热膨胀系数
 
 热膨胀系数也可能随温度变化：
 
 $$\alpha(T) = \alpha_0 + \alpha_1 T + \alpha_2 T^2$$
 
-```cpp
+#+begin_src cpp
 [Materials]
   [thermal_expansion_coeff]
     type = GenericFunctionMaterial
@@ -245,13 +245,13 @@ $$\alpha(T) = \alpha_0 + \alpha_1 T + \alpha_2 T^2$$
     symbol_values = '1e-5  1e-8   5e-12   temperature'
   []
 []
-```
+#+end_src
 
-## 7.4 弹性张量定义
+** 7.4 弹性张量定义
 
-### 7.4.1 各向同性材料
+*** 7.4.1 各向同性材料
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
@@ -262,13 +262,13 @@ $$\alpha(T) = \alpha_0 + \alpha_1 T + \alpha_2 T^2$$
     # shear_modulus = 77e9
   []
 []
-```
+#+end_src
 
-### 7.4.2 正交各向异性材料
+*** 7.4.2 正交各向异性材料
 
 **方法 1：使用工程常数**
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeElasticityTensor
@@ -277,11 +277,11 @@ $$\alpha(T) = \alpha_0 + \alpha_1 T + \alpha_2 T^2$$
     C_ijkl = '150e9 150e9 10e9 0.3 0.3 0.4 7e9 7e9 5e9'
   []
 []
-```
+#+end_src
 
 **方法 2：直接指定刚度矩阵**
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeElasticityTensor
@@ -290,11 +290,11 @@ $$\alpha(T) = \alpha_0 + \alpha_1 T + \alpha_2 T^2$$
     C_ijkl = '165e9  63.9e9 63.9e9 165e9  63.9e9 165e9  79.6e9 79.6e9 79.6e9'
   []
 []
-```
+#+end_src
 
 **方法 3：完整 21 个独立分量**
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeElasticityTensor
@@ -303,13 +303,13 @@ $$\alpha(T) = \alpha_0 + \alpha_1 T + \alpha_2 T^2$$
     C_ijkl = '...'  # 21 个值
   []
 []
-```
+#+end_src
 
-### 7.4.3 从文件读取弹性张量
+*** 7.4.3 从文件读取弹性张量
 
 对于复杂的材料或从实验数据获得的弹性张量：
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeElasticityTensor
@@ -317,10 +317,10 @@ $$\alpha(T) = \alpha_0 + \alpha_1 T + \alpha_2 T^2$$
     file_name = 'elasticity_tensor.txt'
   []
 []
-```
+#+end_src
 
 文件格式（`elasticity_tensor.txt`）：
-```
+#+begin_src
 # 6x6 弹性矩阵（Voigt 记号）
 C11 C12 C13 C14 C15 C16
 C12 C22 C23 C24 C25 C26
@@ -328,13 +328,13 @@ C13 C23 C33 C34 C35 C36
 C14 C24 C34 C44 C45 C46
 C15 C25 C35 C45 C55 C56
 C16 C26 C36 C46 C56 C66
-```
+#+end_src
 
-## 7.5 应变和应力计算
+** 7.5 应变和应力计算
 
-### 7.5.1 小应变理论
+*** 7.5.1 小应变理论
 
-```cpp
+#+begin_src cpp
 [Materials]
   [strain]
     type = ComputeSmallStrain
@@ -345,13 +345,13 @@ C16 C26 C36 C46 C56 C66
     type = ComputeLinearElasticStress
   []
 []
-```
+#+end_src
 
-### 7.5.2 有限应变理论
+*** 7.5.2 有限应变理论
 
 对于大变形问题（详见第12章）：
 
-```cpp
+#+begin_src cpp
 [Materials]
   [strain]
     type = ComputeFiniteStrain
@@ -362,24 +362,24 @@ C16 C26 C36 C46 C56 C66
     type = ComputeFiniteStrainElasticStress
   []
 []
-```
+#+end_src
 
-### 7.5.3 增量应变
+*** 7.5.3 增量应变
 
 某些材料模型需要应变增量：
 
-```cpp
+#+begin_src cpp
 [Materials]
   [strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
   []
 []
-```
+#+end_src
 
-## 7.6 特征应变（Eigenstrain）
+** 7.6 特征应变（Eigenstrain）
 
-### 7.6.1 概念
+*** 7.6.1 概念
 
 特征应变是非机械因素产生的应变，如：
 - 热膨胀
@@ -394,9 +394,9 @@ $$\boldsymbol{\epsilon}^{total} = \boldsymbol{\epsilon}^{elastic} + \boldsymbol{
 应力计算：
 $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C} : (\boldsymbol{\epsilon}^{total} - \boldsymbol{\epsilon}^{eigen})$$
 
-### 7.6.2 热特征应变
+*** 7.6.2 热特征应变
 
-```cpp
+#+begin_src cpp
 [Modules/TensorMechanics/Master]
   [all]
     strain = SMALL
@@ -414,11 +414,11 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     eigenstrain_name = thermal_strain
   []
 []
-```
+#+end_src
 
-### 7.6.3 各向异性热膨胀
+*** 7.6.3 各向异性热膨胀
 
-```cpp
+#+begin_src cpp
 [Materials]
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
@@ -429,11 +429,11 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     eigenstrain_name = thermal_strain
   []
 []
-```
+#+end_src
 
-### 7.6.4 多种特征应变
+*** 7.6.4 多种特征应变
 
-```cpp
+#+begin_src cpp
 [Modules/TensorMechanics/Master]
   [all]
     strain = SMALL
@@ -465,13 +465,13 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     ep_plastic_tolerance = 1e-9
   []
 []
-```
+#+end_src
 
-## 7.7 材料属性的后处理
+** 7.7 材料属性的后处理
 
-### 7.7.1 输出材料属性
+*** 7.7.1 输出材料属性
 
-```cpp
+#+begin_src cpp
 [Outputs]
   [exodus]
     type = Exodus
@@ -479,11 +479,11 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     output_material_properties = true
   []
 []
-```
+#+end_src
 
-### 7.7.2 使用辅助变量查看材料属性
+*** 7.7.2 使用辅助变量查看材料属性
 
-```cpp
+#+begin_src cpp
 [AuxVariables]
   [E_aux]
     order = CONSTANT
@@ -511,11 +511,11 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     execute_on = timestep_end
   []
 []
-```
+#+end_src
 
-### 7.7.3 张量属性的可视化
+*** 7.7.3 张量属性的可视化
 
-```cpp
+#+begin_src cpp
 [AuxVariables]
   [C11]
     order = CONSTANT
@@ -535,13 +535,13 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     execute_on = timestep_end
   []
 []
-```
+#+end_src
 
-## 7.8 多块材料
+** 7.8 多块材料
 
-### 7.8.1 不同区域不同材料
+*** 7.8.1 不同区域不同材料
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -611,17 +611,17 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     type = ComputeLinearElasticStress
   []
 []
-```
+#+end_src
 
-### 7.8.2 界面处理
+*** 7.8.2 界面处理
 
 不同材料界面自动处理，MOOSE 确保位移连续性和力平衡。
 
-## 7.9 高级材料模型
+** 7.9 高级材料模型
 
-### 7.9.1 率相关材料
+*** 7.9.1 率相关材料
 
-```cpp
+#+begin_src cpp
 [Materials]
   [strain_rate]
     type = ComputeStrainRate
@@ -633,11 +633,11 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     ...
   []
 []
-```
+#+end_src
 
-### 7.9.2 损伤材料
+*** 7.9.2 损伤材料
 
-```cpp
+#+begin_src cpp
 [Materials]
   [damage]
     type = ComputeDamageStress
@@ -649,11 +649,11 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     ...
   []
 []
-```
+#+end_src
 
-### 7.9.3 超弹性材料
+*** 7.9.3 超弹性材料
 
-```cpp
+#+begin_src cpp
 [Materials]
   [hyperelastic]
     type = ComputeNeoHookeanStress
@@ -661,11 +661,11 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     shear_modulus = 80e9
   []
 []
-```
+#+end_src
 
-## 7.10 材料数据库
+** 7.10 材料数据库
 
-### 7.10.1 常见材料参数
+*** 7.10.1 常见材料参数
 
 **金属**：
 
@@ -698,9 +698,9 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
 | 碳化硅 | 410 | 0.14 | 3210 |
 | 氮化硅 | 310 | 0.27 | 3200 |
 
-### 7.10.2 创建材料库
+*** 7.10.2 创建材料库
 
-```cpp
+#+begin_src cpp
 # material_library.i
 [Materials]
   [steel_AISI4340]
@@ -720,15 +720,15 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
 [Materials]
   !include material_library.i
 []
-```
+#+end_src
 
-## 7.11 材料验证和测试
+** 7.11 材料验证和测试
 
-### 7.11.1 单元测试
+*** 7.11.1 单元测试
 
 创建简单的单元测试验证材料模型：
 
-```cpp
+#+begin_src cpp
 # 单轴拉伸测试
 [Mesh]
   type = GeneratedMesh
@@ -790,11 +790,11 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}^{elastic} = \mathbb{C
     expression = 'stress_zz / strain_zz'
   []
 []
-```
+#+end_src
 
-### 7.11.2 材料参数敏感性分析
+*** 7.11.2 材料参数敏感性分析
 
-```bash
+#+begin_src bash
 #!/bin/bash
 # 参数扫描脚本
 
@@ -807,73 +807,73 @@ for E in 180e9 200e9 220e9; do
       Outputs/file_base=results_E${E}_nu${nu}
   done
 done
-```
+#+end_src
 
-## 7.12 实例：温度相关材料分析
+** 7.12 实例：温度相关材料分析
 
 参见 `examples/temperature_dependent_material.i`
 
-## 7.13 练习
+** 7.13 练习
 
-### 练习 1：材料定义
+*** 练习 1：材料定义
 创建一个多材料问题：
 - 两种不同材料的复合结构
 - 定义所有必需的材料属性
 - 验证界面连续性
 
-### 练习 2：温度相关分析
+*** 练习 2：温度相关分析
 实现温度相关的弹性模量：
 - 使用 ParsedFunction 定义 E(T)
 - 创建温度场
 - 分析热弹耦合
 
-### 练习 3：各向异性材料
+*** 练习 3：各向异性材料
 定义一个正交各向异性材料：
 - 使用工程常数
 - 验证材料矩阵的对称性
 - 与各向同性结果对比
 
-### 练习 4：特征应变
+*** 练习 4：特征应变
 实现热膨胀分析：
 - 定义热膨胀系数
 - 施加温度变化
 - 计算热应力
 
-### 练习 5：材料库
+*** 练习 5：材料库
 创建可重用的材料库：
 - 定义多种常见材料
 - 使用 !include 引用
 - 参数化材料定义
 
-## 7.14 故障排除
+** 7.14 故障排除
 
-### 7.14.1 常见错误
+*** 7.14.1 常见错误
 
 **未定义的材料属性**：
-```
+#+begin_src
 错误信息：Material property 'elasticity_tensor' not defined
 解决方法：确保所有需要的材料对象都已定义
-```
+#+end_src
 
 **材料依赖顺序错误**：
-```
+#+begin_src
 症状：计算结果不正确或不收敛
 原因：材料对象计算顺序错误
 解决：MOOSE 通常自动处理，检查依赖关系
-```
+#+end_src
 
 **不合理的材料参数**：
-```
+#+begin_src
 症状：数值不稳定或不物理的结果
 检查：
 - 泊松比范围：-1 < ν < 0.5
 - 正定性：弹性矩阵必须正定
 - 单位一致性
-```
+#+end_src
 
-### 7.14.2 调试技巧
+*** 7.14.2 调试技巧
 
-```cpp
+#+begin_src cpp
 [Debug]
   show_material_props = true  # 显示所有材料属性
 []
@@ -884,9 +884,9 @@ done
     execute_on = timestep_end
   []
 []
-```
+#+end_src
 
-## 7.15 小结
+** 7.15 小结
 
 本章详细介绍了 MOOSE 中的材料属性定义：
 
@@ -897,7 +897,7 @@ done
 - ✓ 多材料和材料库
 - ✓ 材料验证和测试方法
 
-## 下一章
+** 下一章
 
 下一章将详细讨论各种边界条件和载荷类型的定义和应用。
 

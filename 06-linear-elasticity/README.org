@@ -1,8 +1,8 @@
-# 第六章：线性弹性问题详解
+* 第六章：线性弹性问题详解
 
-## 6.1 线性弹性理论基础
+** 6.1 线性弹性理论基础
 
-### 6.1.1 基本假设
+*** 6.1.1 基本假设
 
 线性弹性理论基于以下假设：
 - **小变形假设**：位移和应变都很小
@@ -10,7 +10,7 @@
 - **弹性行为**：卸载后完全恢复
 - **连续介质**：材料连续分布
 
-### 6.1.2 基本方程
+*** 6.1.2 基本方程
 
 **平衡方程**：
 $$\nabla \cdot \boldsymbol{\sigma} + \mathbf{f} = 0$$
@@ -26,7 +26,7 @@ $$\boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\epsilon}$$
 
 其中 $\mathbb{C}$ 是四阶弹性张量。
 
-### 6.1.3 应力和应变张量
+*** 6.1.3 应力和应变张量
 
 应力张量（对称）：
 $$\boldsymbol{\sigma} = \begin{bmatrix}
@@ -44,9 +44,9 @@ $$\boldsymbol{\epsilon} = \begin{bmatrix}
 
 工程剪应变：$\gamma_{ij} = 2\epsilon_{ij}$ (当 $i \neq j$)
 
-## 6.2 各向同性材料
+** 6.2 各向同性材料
 
-### 6.2.1 材料参数
+*** 6.2.1 材料参数
 
 各向同性材料具有两个独立的弹性常数：
 
@@ -62,7 +62,7 @@ $$\mu = G = \frac{E}{2(1+\nu)}$$
 
 $$K = \frac{E}{3(1-2\nu)}$$
 
-### 6.2.2 本构关系
+*** 6.2.2 本构关系
 
 **应力-应变关系**：
 $$\sigma_{ij} = \lambda \epsilon_{kk} \delta_{ij} + 2\mu \epsilon_{ij}$$
@@ -93,9 +93,9 @@ $$\begin{Bmatrix}
 \gamma_{xy}
 \end{Bmatrix}$$
 
-### 6.2.3 MOOSE 实现
+*** 6.2.3 MOOSE 实现
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
@@ -112,11 +112,11 @@ $$\begin{Bmatrix}
     type = ComputeLinearElasticStress
   []
 []
-```
+#+end_src
 
-## 6.3 各向异性材料
+** 6.3 各向异性材料
 
-### 6.3.1 一般各向异性
+*** 6.3.1 一般各向异性
 
 一般各向异性材料有 21 个独立的弹性常数：
 
@@ -129,7 +129,7 @@ C_{11} & C_{12} & C_{13} & C_{14} & C_{15} & C_{16} \\
        &        &        &        &        & C_{66}
 \end{bmatrix}$$
 
-### 6.3.2 正交各向异性
+*** 6.3.2 正交各向异性
 
 正交各向异性材料有 9 个独立常数（如木材、复合材料层板）：
 
@@ -159,7 +159,7 @@ $$\mathbb{S} = \begin{bmatrix}
 
 对称性要求：$\frac{\nu_{ij}}{E_i} = \frac{\nu_{ji}}{E_j}$
 
-### 6.3.3 横观各向同性
+*** 6.3.3 横观各向同性
 
 横观各向同性材料有 5 个独立常数（如单向纤维复合材料）：
 
@@ -174,11 +174,11 @@ $$\mathbb{S} = \begin{bmatrix}
 
 其中：$G_{TT} = \frac{E_T}{2(1+\nu_{TT})}$
 
-### 6.3.4 MOOSE 中的各向异性材料
+*** 6.3.4 MOOSE 中的各向异性材料
 
 **方法 1：直接指定弹性矩阵**
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeElasticityTensor
@@ -196,11 +196,11 @@ $$\mathbb{S} = \begin{bmatrix}
     type = ComputeLinearElasticStress
   []
 []
-```
+#+end_src
 
 **方法 2：使用工程常数（正交各向异性）**
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeElasticityTensor
@@ -209,22 +209,22 @@ $$\mathbb{S} = \begin{bmatrix}
     C_ijkl = '150e9 150e9 10e9 0.3 0.3 0.4 7e9 7e9 5e9'
   []
 []
-```
+#+end_src
 
 **方法 3：从文件读取**
 
-```cpp
+#+begin_src cpp
 [Materials]
   [elasticity_tensor]
     type = ComputeElasticityTensorFromFile
     file_name = 'elasticity_tensor.txt'
   []
 []
-```
+#+end_src
 
-## 6.4 完整示例：正交各向异性板
+** 6.4 完整示例：正交各向异性板
 
-### 6.4.1 问题描述
+*** 6.4.1 问题描述
 
 分析一块正交各向异性复合材料板的变形：
 - 尺寸：100mm × 100mm × 10mm
@@ -232,9 +232,9 @@ $$\mathbb{S} = \begin{bmatrix}
 - 载荷：顶面均布压力 1 MPa
 - 约束：底面固定
 
-### 6.4.2 材料参数
+*** 6.4.2 材料参数
 
-```
+#+begin_src
 E_x = 150 GPa  (纤维方向)
 E_y = 150 GPa  (纤维方向)
 E_z = 10 GPa   (垂直于纤维)
@@ -244,15 +244,15 @@ E_z = 10 GPa   (垂直于纤维)
 G_xy = 7 GPa
 G_xz = 7 GPa
 G_yz = 5 GPa
-```
+#+end_src
 
-### 6.4.3 MOOSE 输入文件
+*** 6.4.3 MOOSE 输入文件
 
 参见 `examples/orthotropic_plate.i`
 
-## 6.5 平面问题
+** 6.5 平面问题
 
-### 6.5.1 平面应力
+*** 6.5.1 平面应力
 
 **假设**：$\sigma_{zz} = \sigma_{xz} = \sigma_{yz} = 0$
 
@@ -278,7 +278,7 @@ $$\begin{Bmatrix}
 
 **MOOSE 实现**：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = GeneratedMesh
   dim = 2  # 二维网格
@@ -293,9 +293,9 @@ $$\begin{Bmatrix}
     add_variables = true
   []
 []
-```
+#+end_src
 
-### 6.5.2 平面应变
+*** 6.5.2 平面应变
 
 **假设**：$\epsilon_{zz} = \epsilon_{xz} = \epsilon_{yz} = 0$
 
@@ -321,7 +321,7 @@ $$\begin{Bmatrix}
 
 **MOOSE 实现**：
 
-```cpp
+#+begin_src cpp
 [Modules/TensorMechanics/Master]
   [all]
     strain = SMALL
@@ -329,11 +329,11 @@ $$\begin{Bmatrix}
     add_variables = true
   []
 []
-```
+#+end_src
 
-## 6.6 轴对称问题
+** 6.6 轴对称问题
 
-### 6.6.1 理论
+*** 6.6.1 理论
 
 适用于绕某轴旋转对称的问题（如压力容器、轴、轮盘）。
 
@@ -345,9 +345,9 @@ $$\epsilon_{\theta\theta} = \frac{u_r}{r}$$
 $$\epsilon_{zz} = \frac{\partial u_z}{\partial z}$$
 $$\gamma_{rz} = \frac{\partial u_r}{\partial z} + \frac{\partial u_z}{\partial r}$$
 
-### 6.6.2 MOOSE 实现
+*** 6.6.2 MOOSE 实现
 
-```cpp
+#+begin_src cpp
 [Problem]
   coord_type = RZ  # 轴对称坐标系
 []
@@ -370,7 +370,7 @@ $$\gamma_{rz} = \frac{\partial u_r}{\partial z} + \frac{\partial u_z}{\partial r
     generate_output = 'stress_xx stress_yy stress_zz stress_xy'
   []
 []
-```
+#+end_src
 
 注意：
 - `coord_type = RZ` 激活轴对称
@@ -378,9 +378,9 @@ $$\gamma_{rz} = \frac{\partial u_r}{\partial z} + \frac{\partial u_z}{\partial r
 - 网格的 y 方向对应轴向 $z$
 - 避免 $r = 0$ 以防止奇异性
 
-## 6.7 应力分析结果
+** 6.7 应力分析结果
 
-### 6.7.1 主应力
+*** 6.7.1 主应力
 
 三个主应力 $\sigma_1, \sigma_2, \sigma_3$ 是应力张量的特征值：
 
@@ -388,7 +388,7 @@ $$\det(\boldsymbol{\sigma} - \sigma_i \mathbf{I}) = 0$$
 
 **MOOSE 输出**：
 
-```cpp
+#+begin_src cpp
 [Modules/TensorMechanics/Master]
   [all]
     strain = SMALL
@@ -396,9 +396,9 @@ $$\det(\boldsymbol{\sigma} - \sigma_i \mathbf{I}) = 0$$
     generate_output = 'max_principal_stress mid_principal_stress min_principal_stress'
   []
 []
-```
+#+end_src
 
-### 6.7.2 von Mises 应力
+*** 6.7.2 von Mises 应力
 
 用于判断屈服的等效应力：
 
@@ -410,7 +410,7 @@ $$\mathbf{s} = \boldsymbol{\sigma} - \frac{1}{3}\text{tr}(\boldsymbol{\sigma})\m
 
 **MOOSE 输出**：
 
-```cpp
+#+begin_src cpp
 [Modules/TensorMechanics/Master]
   [all]
     strain = SMALL
@@ -435,13 +435,13 @@ $$\mathbf{s} = \boldsymbol{\sigma} - \frac{1}{3}\text{tr}(\boldsymbol{\sigma})\m
     scalar_type = VonMisesStress
   []
 []
-```
+#+end_src
 
-### 6.7.3 Tresca 应力
+*** 6.7.3 Tresca 应力
 
 $$\sigma_{Tresca} = \sigma_1 - \sigma_3$$
 
-```cpp
+#+begin_src cpp
 [Modules/TensorMechanics/Master]
   [all]
     generate_output = 'max_principal_stress min_principal_stress'
@@ -463,23 +463,23 @@ $$\sigma_{Tresca} = \sigma_1 - \sigma_3$$
     expression = 'max_principal_stress - min_principal_stress'
   []
 []
-```
+#+end_src
 
-### 6.7.4 静水压力
+*** 6.7.4 静水压力
 
 $$p = -\frac{1}{3}\text{tr}(\boldsymbol{\sigma}) = -\frac{1}{3}(\sigma_{xx} + \sigma_{yy} + \sigma_{zz})$$
 
-```cpp
+#+begin_src cpp
 [Modules/TensorMechanics/Master]
   [all]
     generate_output = 'hydrostatic_stress'
   []
 []
-```
+#+end_src
 
-## 6.8 应变能
+** 6.8 应变能
 
-### 6.8.1 应变能密度
+*** 6.8.1 应变能密度
 
 $$U = \frac{1}{2}\boldsymbol{\sigma}:\boldsymbol{\epsilon} = \frac{1}{2}\sigma_{ij}\epsilon_{ij}$$
 
@@ -487,13 +487,13 @@ $$U = \frac{1}{2}\boldsymbol{\sigma}:\boldsymbol{\epsilon} = \frac{1}{2}\sigma_{
 
 $$U = \frac{1}{2}\boldsymbol{\epsilon}:\mathbb{C}:\boldsymbol{\epsilon}$$
 
-### 6.8.2 总应变能
+*** 6.8.2 总应变能
 
 $$W = \int_\Omega U \, d\Omega$$
 
 **MOOSE 计算**：
 
-```cpp
+#+begin_src cpp
 [AuxVariables]
   [strain_energy_density]
     order = CONSTANT
@@ -516,11 +516,11 @@ $$W = \int_\Omega U \, d\Omega$$
     variable = strain_energy_density
   []
 []
-```
+#+end_src
 
-## 6.9 热弹性耦合
+** 6.9 热弹性耦合
 
-### 6.9.1 理论
+*** 6.9.1 理论
 
 考虑热应变的影响：
 
@@ -539,9 +539,9 @@ $$\boldsymbol{\epsilon}^{th} = \alpha (T - T_0) \mathbf{I}$$
 
 $$\boldsymbol{\sigma} = \mathbb{C}:(\boldsymbol{\epsilon} - \boldsymbol{\epsilon}^{th})$$
 
-### 6.9.2 MOOSE 实现
+*** 6.9.2 MOOSE 实现
 
-```cpp
+#+begin_src cpp
 [Variables]
   [temperature]
     initial_condition = 300  # K
@@ -575,11 +575,11 @@ $$\boldsymbol{\sigma} = \mathbb{C}:(\boldsymbol{\epsilon} - \boldsymbol{\epsilon
     type = ComputeLinearElasticStress
   []
 []
-```
+#+end_src
 
-## 6.10 实际工程应用
+** 6.10 实际工程应用
 
-### 6.10.1 应力集中
+*** 6.10.1 应力集中
 
 在孔、缺口、急剧变化的几何处会产生应力集中。
 
@@ -591,7 +591,7 @@ $$K_t = \frac{\sigma_{max}}{\sigma_{nom}}$$
 
 $$K_t = 3$$
 
-### 6.10.2 Saint-Venant 原理
+*** 6.10.2 Saint-Venant 原理
 
 局部载荷的具体分布方式仅在局部产生影响，远离载荷区域的应力场主要取决于载荷的合力和合力矩。
 
@@ -599,7 +599,7 @@ $$K_t = 3$$
 - 可以用简化的载荷模型
 - 关注点应远离载荷施加区域
 
-### 6.10.3 接触问题初步
+*** 6.10.3 接触问题初步
 
 两个或多个物体相互接触时，需要特殊处理：
 - 接触约束：不能相互穿透
@@ -608,52 +608,52 @@ $$K_t = 3$$
 
 MOOSE 中使用 Contact 模块处理（详见第14章）。
 
-## 6.11 练习
+** 6.11 练习
 
-### 练习 1：各向同性材料分析
+*** 练习 1：各向同性材料分析
 创建一个简单的拉伸测试模型：
 - 尺寸：10mm × 10mm × 100mm 的柱体
 - 材料：铝合金（E = 70 GPa, ν = 0.33）
 - 边界条件：一端固定，另一端施加 100 MPa 拉应力
 - 计算：最大位移和应变能
 
-### 练习 2：正交各向异性板
+*** 练习 2：正交各向异性板
 修改 `examples/orthotropic_plate.i`：
 - 改变纤维方向（旋转材料坐标系）
 - 比较不同纤维方向的变形
 
-### 练习 3：平面应力 vs 平面应变
+*** 练习 3：平面应力 vs 平面应变
 创建相同几何的两个模型：
 - 使用平面应力假设
 - 使用平面应变假设
 - 比较结果差异
 
-### 练习 4：轴对称压力容器
+*** 练习 4：轴对称压力容器
 分析一个厚壁圆筒：
 - 内半径 50mm，外半径 100mm，长度 500mm
 - 内压 10 MPa
 - 材料：钢（E = 200 GPa, ν = 0.3）
 - 与 Lamé 解析解对比
 
-### 练习 5：应力集中
+*** 练习 5：应力集中
 创建带圆孔的板：
 - 板尺寸：200mm × 100mm × 10mm
 - 圆孔直径：20mm（中心）
 - 单向拉伸 50 MPa
 - 计算应力集中系数
 
-### 练习 6：热弹性耦合
+*** 练习 6：热弹性耦合
 模拟热应力：
 - 一个固定的立方体
 - 均匀加热 100°C
 - 计算产生的热应力
 
-## 6.12 故障排除
+** 6.12 故障排除
 
-### 6.12.1 常见错误
+*** 6.12.1 常见错误
 
 **不收敛问题**：
-```
+#+begin_src
 症状：Newton 迭代不收敛
 原因：
 - 约束不足（刚体位移）
@@ -663,10 +663,10 @@ MOOSE 中使用 Contact 模块处理（详见第14章）。
 - 检查边界条件
 - 验证材料参数
 - 改善网格质量
-```
+#+end_src
 
 **不合理的泊松比**：
-```
+#+begin_src
 错误：ν < -1 或 ν > 0.5
 影响：
 - 负体积模量
@@ -674,36 +674,36 @@ MOOSE 中使用 Contact 模块处理（详见第14章）。
 约束：
 - 各向同性：-1 < ν < 0.5
 - 实际材料：0 < ν < 0.5
-```
+#+end_src
 
 **刚体位移**：
-```
+#+begin_src
 症状：位移趋于无穷
 原因：约束不足
 解决：添加足够的约束以消除刚体位移
-```
+#+end_src
 
-### 6.12.2 验证方法
+*** 6.12.2 验证方法
 
 1. **解析解对比**：用简单问题验证
 2. **网格收敛性研究**：细化网格检查收敛
 3. **能量守恒**：检查应变能
 4. **对称性**：利用对称性验证
 
-## 6.13 高级话题
+** 6.13 高级话题
 
-### 6.13.1 子模型技术
+*** 6.13.1 子模型技术
 
 对局部区域进行精细分析：
 1. 全局粗糙模型
 2. 提取边界条件
 3. 局部精细模型
 
-### 6.13.2 材料坐标系
+*** 6.13.2 材料坐标系
 
 对于各向异性材料，需要定义材料坐标系：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   # 定义单元方向
   [./egid]
@@ -733,13 +733,13 @@ MOOSE 中使用 Contact 模块处理（详见第14章）。
     ...
   [../]
 []
-```
+#+end_src
 
-### 6.13.3 周期边界条件
+*** 6.13.3 周期边界条件
 
 对于重复性结构，可以使用周期边界条件：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -752,9 +752,9 @@ MOOSE 中使用 Contact 模块处理（详见第14章）。
     auto_dir = 'x y'
   [../]
 []
-```
+#+end_src
 
-## 6.14 小结
+** 6.14 小结
 
 本章详细介绍了线性弹性问题：
 
@@ -765,7 +765,7 @@ MOOSE 中使用 Contact 模块处理（详见第14章）。
 - ✓ 热弹性耦合
 - ✓ 实际工程应用
 
-## 下一章
+** 下一章
 
 下一章将详细讨论 MOOSE 中的材料属性定义，包括温度依赖性和复杂本构模型。
 

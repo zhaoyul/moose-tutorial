@@ -1,8 +1,8 @@
-# 第九章：网格生成和管理
+* 第九章：网格生成和管理
 
-## 9.1 网格基础
+** 9.1 网格基础
 
-### 9.1.1 网格的重要性
+*** 9.1.1 网格的重要性
 
 网格质量直接影响：
 - **精度**：网格细化程度决定解的精度
@@ -10,7 +10,7 @@
 - **收敛性**：差的网格质量导致不收敛
 - **结果可靠性**：扭曲单元产生不准确结果
 
-### 9.1.2 单元类型
+*** 9.1.2 单元类型
 
 **1D 单元**：
 - EDGE2：线性（2节点）
@@ -30,7 +30,7 @@
 - PRISM6：楔形（6节点）
 - PYRAMID5：金字塔（5节点）
 
-### 9.1.3 单元选择原则
+*** 9.1.3 单元选择原则
 
 **结构化 vs 非结构化**：
 - 结构化网格：规则排列，效率高，适合简单几何
@@ -44,15 +44,15 @@
 - 一阶（线性）：简单快速，需要更细的网格
 - 二阶（二次）：精度高，可用粗网格，但计算成本高
 
-## 9.2 MOOSE 内置网格生成
+** 9.2 MOOSE 内置网格生成
 
-### 9.2.1 GeneratedMesh
+*** 9.2.1 GeneratedMesh
 
 最简单的网格生成器，创建规则矩形/立方体网格。
 
 **2D 网格**：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -64,11 +64,11 @@
   ny = 25   # y 方向单元数
   elem_type = QUAD4  # QUAD4, QUAD8, QUAD9, TRI3, TRI6
 []
-```
+#+end_src
 
 **3D 网格**：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -83,11 +83,11 @@
   nz = 10
   elem_type = HEX8  # HEX8, HEX20, HEX27, TET4, TET10
 []
-```
+#+end_src
 
 **偏置网格**（非均匀分布）：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -100,15 +100,15 @@
   bias_x = 1.1  # x 方向渐变，右侧更密
   bias_y = 0.9  # y 方向渐变，上方更密
 []
-```
+#+end_src
 
-### 9.2.2 MeshGenerators 系统
+*** 9.2.2 MeshGenerators 系统
 
 更灵活的网格生成方法，支持链式操作。
 
 **基本使用**：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -133,13 +133,13 @@
     refinement = 2  # 细化 2 次
   []
 []
-```
+#+end_src
 
-### 9.2.3 常用 MeshGenerators
+*** 9.2.3 常用 MeshGenerators
 
 **细化网格**：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [base]
     type = FileMeshGenerator
@@ -154,11 +154,11 @@
     refinement = 2
   []
 []
-```
+#+end_src
 
 **合并网格**：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [mesh1]
     type = GeneratedMeshGenerator
@@ -183,11 +183,11 @@
     inputs = 'mesh1 mesh2'
   []
 []
-```
+#+end_src
 
 **变换网格**：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -211,11 +211,11 @@
     vector_value = '10 0 0'  # x 方向平移 10 单位
   []
 []
-```
+#+end_src
 
-## 9.3 导入外部网格
+** 9.3 导入外部网格
 
-### 9.3.1 支持的格式
+*** 9.3.1 支持的格式
 
 MOOSE 通过 libMesh 支持多种网格格式：
 - Exodus II (`.e`, `.exo`)
@@ -225,36 +225,36 @@ MOOSE 通过 libMesh 支持多种网格格式：
 - VTK (`.vtk`, `.vtu`)
 - Tetgen (`.node`, `.ele`)
 
-### 9.3.2 导入 Exodus II 网格
+*** 9.3.2 导入 Exodus II 网格
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = FileMesh
   file = 'mesh.e'
 []
-```
+#+end_src
 
-### 9.3.3 导入 Gmsh 网格
+*** 9.3.3 导入 Gmsh 网格
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = FileMesh
   file = 'mesh.msh'
 []
-```
+#+end_src
 
-### 9.3.4 导入 Abaqus 网格
+*** 9.3.4 导入 Abaqus 网格
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = FileMesh
   file = 'mesh.inp'
 []
-```
+#+end_src
 
-## 9.4 使用 Gmsh 生成网格
+** 9.4 使用 Gmsh 生成网格
 
-### 9.4.1 Gmsh 简介
+*** 9.4.1 Gmsh 简介
 
 Gmsh 是开源的 3D 有限元网格生成器，功能强大：
 - 图形界面和脚本接口
@@ -262,11 +262,11 @@ Gmsh 是开源的 3D 有限元网格生成器，功能强大：
 - CAD 导入
 - 网格优化
 
-### 9.4.2 Gmsh 脚本示例
+*** 9.4.2 Gmsh 脚本示例
 
 **带孔的平板**（`plate_with_hole.geo`）：
 
-```cpp
+#+begin_src cpp
 // 几何参数
 lc = 0.1;  // 特征长度
 L = 10;    // 板长
@@ -318,19 +318,19 @@ Physical Curve("hole") = {5};
 // 网格选项
 Mesh.Algorithm = 6;  // Frontal-Delaunay
 Mesh.ElementOrder = 2;  // 二阶单元
-```
+#+end_src
 
 **生成网格**：
 
-```bash
+#+begin_src bash
 gmsh -2 plate_with_hole.geo -o plate_with_hole.msh
-```
+#+end_src
 
-### 9.4.3 3D Gmsh 示例
+*** 9.4.3 3D Gmsh 示例
 
 **圆柱体**（`cylinder.geo`）：
 
-```cpp
+#+begin_src cpp
 // 参数
 lc = 0.1;
 R = 1.0;   // 半径
@@ -365,11 +365,11 @@ Physical Volume("volume") = {1};
 Physical Surface("bottom") = {1};
 Physical Surface("top") = {26};
 Physical Surface("side") = {13, 17, 21, 25};
-```
+#+end_src
 
-## 9.5 网格质量评估
+** 9.5 网格质量评估
 
-### 9.5.1 质量指标
+*** 9.5.1 质量指标
 
 **长宽比（Aspect Ratio）**：
 $$AR = \frac{\text{最长边}}{\text{最短边}}$$
@@ -397,9 +397,9 @@ $$J = \det\left(\frac{\partial \vec{x}}{\partial \vec{\xi}}\right)$$
 **正交性（Orthogonality）**：
 测量单元边之间的角度接近 90° 的程度。
 
-### 9.5.2 MOOSE 中检查网格质量
+*** 9.5.2 MOOSE 中检查网格质量
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = FileMeshGenerator
@@ -418,13 +418,13 @@ $$J = \det\left(\frac{\partial \vec{x}}{\partial \vec{\xi}}\right)$$
     execute_on = 'initial'
   []
 []
-```
+#+end_src
 
 然后在 Paraview 中查看质量指标。
 
-### 9.5.3 命令行检查
+*** 9.5.3 命令行检查
 
-```bash
+#+begin_src bash
 # 使用 MOOSE 的网格工具
 moose-mesh-quality -i input_mesh.e -o quality_output
 
@@ -433,17 +433,17 @@ moose-mesh-quality -i input_mesh.e -o quality_output
   check_mesh_quality = true
   quality_threshold = 0.5
 []
-```
+#+end_src
 
-## 9.6 网格自适应细化
+** 9.6 网格自适应细化
 
-### 9.6.1 h-适应性（网格细化）
+*** 9.6.1 h-适应性（网格细化）
 
 根据误差估计自适应细化网格。
 
 **基于误差指示器**：
 
-```cpp
+#+begin_src cpp
 [Adaptivity]
   marker = error_marker
   max_h_level = 3  # 最多细化 3 次
@@ -464,11 +464,11 @@ moose-mesh-quality -i input_mesh.e -o quality_output
     []
   []
 []
-```
+#+end_src
 
 **基于几何位置**：
 
-```cpp
+#+begin_src cpp
 [Adaptivity]
   marker = box_marker
   max_h_level = 2
@@ -484,36 +484,36 @@ moose-mesh-quality -i input_mesh.e -o quality_output
     []
   []
 []
-```
+#+end_src
 
-### 9.6.2 p-适应性（阶次提升）
+*** 9.6.2 p-适应性（阶次提升）
 
 提高单元的插值阶次而不是细化网格（MOOSE 支持有限）。
 
-## 9.7 网格分区（并行计算）
+** 9.7 网格分区（并行计算）
 
-### 9.7.1 自动分区
+*** 9.7.1 自动分区
 
 MOOSE 自动使用 METIS 或 ParMETIS 进行网格分区：
 
-```bash
+#+begin_src bash
 mpiexec -n 4 ./app-opt -i input.i
-```
+#+end_src
 
-### 9.7.2 手动分区
+*** 9.7.2 手动分区
 
-```cpp
+#+begin_src cpp
 [Mesh]
   type = FileMesh
   file = 'mesh.e'
   parallel_type = distributed  # 分布式网格
   # parallel_type = replicated  # 复制网格（所有进程有完整网格）
 []
-```
+#+end_src
 
-### 9.7.3 可视化分区
+*** 9.7.3 可视化分区
 
-```cpp
+#+begin_src cpp
 [AuxVariables]
   [proc_id]
     order = CONSTANT
@@ -528,13 +528,13 @@ mpiexec -n 4 ./app-opt -i input.i
     execute_on = 'initial'
   []
 []
-```
+#+end_src
 
-## 9.8 特殊网格技术
+** 9.8 特殊网格技术
 
-### 9.8.1 层状网格（复合材料）
+*** 9.8.1 层状网格（复合材料）
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -566,13 +566,13 @@ mpiexec -n 4 ./app-opt -i input.i
   
   # ... 更多层
 []
-```
+#+end_src
 
-### 9.8.2 扫掠网格
+*** 9.8.2 扫掠网格
 
 对 2D 网格进行拉伸生成 3D 网格：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [base_mesh]
     type = FileMeshGenerator
@@ -587,11 +587,11 @@ mpiexec -n 4 ./app-opt -i input.i
     direction = '0 0 1'      # 拉伸方向
   []
 []
-```
+#+end_src
 
-### 9.8.3 旋转网格（轴对称到 3D）
+*** 9.8.3 旋转网格（轴对称到 3D）
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [base_mesh]
     type = FileMeshGenerator
@@ -607,15 +607,15 @@ mpiexec -n 4 ./app-opt -i input.i
     num_slices = 36  # 旋转分成 36 份
   []
 []
-```
+#+end_src
 
-## 9.9 网格优化
+** 9.9 网格优化
 
-### 9.9.1 光顺（Smoothing）
+*** 9.9.1 光顺（Smoothing）
 
 改善网格质量：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = FileMeshGenerator
@@ -628,11 +628,11 @@ mpiexec -n 4 ./app-opt -i input.i
     iterations = 5
   []
 []
-```
+#+end_src
 
-### 9.9.2 单元转换
+*** 9.9.2 单元转换
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -650,13 +650,13 @@ mpiexec -n 4 ./app-opt -i input.i
     convert_to = HEX20
   []
 []
-```
+#+end_src
 
-## 9.10 实用工具和最佳实践
+** 9.10 实用工具和最佳实践
 
-### 9.10.1 网格收敛性研究
+*** 9.10.1 网格收敛性研究
 
-```bash
+#+begin_src bash
 #!/bin/bash
 # 网格收敛性研究脚本
 
@@ -671,9 +671,9 @@ done
 
 # 提取和比较结果
 python analyze_convergence.py
-```
+#+end_src
 
-### 9.10.2 网格生成检查清单
+*** 9.10.2 网格生成检查清单
 
 - [ ] 单元类型适合问题
 - [ ] 网格足够细以捕捉解的变化
@@ -683,7 +683,7 @@ python analyze_convergence.py
 - [ ] 对关键区域进行局部细化
 - [ ] 验证网格收敛性
 
-### 9.10.3 性能考虑
+*** 9.10.3 性能考虑
 
 **最小化单元数量**：
 - 利用对称性
@@ -695,85 +695,85 @@ python analyze_convergence.py
 - 使用二阶单元减少单元数
 - 在并行计算中考虑负载平衡
 
-## 9.11 完整示例
+** 9.11 完整示例
 
 参见 `examples/` 目录：
 - `adaptive_refinement.i` - 自适应网格细化
 - `imported_gmsh_mesh.i` - 导入 Gmsh 网格
 - `mesh_quality_check.i` - 网格质量检查
 
-## 9.12 练习
+** 9.12 练习
 
-### 练习 1：生成简单网格
+*** 练习 1：生成简单网格
 使用 GeneratedMesh 创建不同网格：
 - 2D 矩形，不同单元类型
 - 3D 立方体，比较 HEX8 和 TET4
 - 偏置网格
 
-### 练习 2：Gmsh 网格
+*** 练习 2：Gmsh 网格
 使用 Gmsh 创建复杂几何：
 - 带孔的平板
 - L 型区域
 - 3D 圆柱
 
-### 练习 3：网格质量
+*** 练习 3：网格质量
 评估网格质量：
 - 生成不同质量的网格
 - 使用质量指标比较
 - 改善差的网格
 
-### 练习 4：自适应细化
+*** 练习 4：自适应细化
 实现自适应细化：
 - 设置误差指示器
 - 运行细化
 - 比较收敛速度
 
-### 练习 5：网格收敛性
+*** 练习 5：网格收敛性
 进行网格收敛性研究：
 - 使用多个网格密度
 - 绘制误差 vs 网格尺寸
 - 确定收敛阶
 
-### 练习 6：多材料网格
+*** 练习 6：多材料网格
 创建多材料结构网格：
 - 定义多个子域
 - 分配不同材料
 - 验证界面处理
 
-## 9.13 故障排除
+** 9.13 故障排除
 
-### 9.13.1 常见网格问题
+*** 9.13.1 常见网格问题
 
 **负雅可比行列式**：
-```
+#+begin_src
 错误：Negative Jacobian detected
 原因：单元严重扭曲或翻转
 解决：
   - 改善网格质量
   - 检查几何定义
   - 减少单元尺寸变化率
-```
+#+end_src
 
 **不兼容的网格**：
-```
+#+begin_src
 症状：导入网格失败
 原因：格式不支持或文件损坏
 解决：
   - 验证文件格式
   - 使用正确的导入选项
   - 转换为支持的格式
-```
+#+end_src
 
 **边界未定义**：
-```
+#+begin_src
 错误：Boundary 'name' not found
 解决：
   - 检查网格文件中的边界定义
   - 使用正确的边界名称
   - 在 Paraview 中可视化边界
-```
+#+end_src
 
-## 9.14 小结
+** 9.14 小结
 
 本章详细介绍了网格生成和管理：
 
@@ -785,7 +785,7 @@ python analyze_convergence.py
 - ✓ 网格分区和并行计算
 - ✓ 实用技巧和最佳实践
 
-## 下一章
+** 下一章
 
 下一章将详细讨论后处理技术和结果可视化。
 

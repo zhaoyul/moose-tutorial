@@ -1,8 +1,8 @@
-# 第八章：边界条件和载荷
+* 第八章：边界条件和载荷
 
-## 8.1 边界条件概述
+** 8.1 边界条件概述
 
-### 8.1.1 边界条件的分类
+*** 8.1.1 边界条件的分类
 
 **按数学类型分类**：
 1. **Dirichlet 边界条件**（本质边界条件）：指定变量值
@@ -24,11 +24,11 @@
 - 周期边界条件
 - 接触约束
 
-### 8.1.2 边界的定义
+*** 8.1.2 边界的定义
 
 MOOSE 中边界通过 sidesets 定义：
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -44,15 +44,15 @@ MOOSE 中边界通过 sidesets 定义：
     new_boundary = 'custom_boundary'
   []
 []
-```
+#+end_src
 
-## 8.2 Dirichlet 边界条件
+** 8.2 Dirichlet 边界条件
 
-### 8.2.1 固定值边界条件
+*** 8.2.1 固定值边界条件
 
 **基本用法**：
 
-```cpp
+#+begin_src cpp
 [BCs]
   [fixed_displacement]
     type = DirichletBC
@@ -61,11 +61,11 @@ MOOSE 中边界通过 sidesets 定义：
     value = 0
   []
 []
-```
+#+end_src
 
 **固定多个自由度**：
 
-```cpp
+#+begin_src cpp
 [BCs]
   [fix_x]
     type = DirichletBC
@@ -88,13 +88,13 @@ MOOSE 中边界通过 sidesets 定义：
     value = 0
   []
 []
-```
+#+end_src
 
-### 8.2.2 PresetBC
+*** 8.2.2 PresetBC
 
 PresetBC 在求解前设置值，对某些问题更稳定：
 
-```cpp
+#+begin_src cpp
 [BCs]
   [preset_disp]
     type = PresetBC
@@ -103,13 +103,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     value = 0.01  # 1 cm 位移
   []
 []
-```
+#+end_src
 
-### 8.2.3 函数边界条件
+*** 8.2.3 函数边界条件
 
 **时间相关位移**：
 
-```cpp
+#+begin_src cpp
 [Functions]
   [displacement_function]
     type = ParsedFunction
@@ -127,11 +127,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     function = displacement_function
   []
 []
-```
+#+end_src
 
 **空间变化的位移**：
 
-```cpp
+#+begin_src cpp
 [Functions]
   [spatial_displacement]
     type = ParsedFunction
@@ -149,13 +149,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     function = spatial_displacement
   []
 []
-```
+#+end_src
 
-### 8.2.4 匹配值边界条件
+*** 8.2.4 匹配值边界条件
 
 使边界上的变量与另一个变量匹配：
 
-```cpp
+#+begin_src cpp
 [BCs]
   [match_boundary]
     type = MatchedValueBC
@@ -164,13 +164,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     v = temperature_other
   []
 []
-```
+#+end_src
 
-## 8.3 Neumann 边界条件
+** 8.3 Neumann 边界条件
 
-### 8.3.1 基本 Neumann BC
+*** 8.3.1 基本 Neumann BC
 
-```cpp
+#+begin_src cpp
 [BCs]
   [flux]
     type = NeumannBC
@@ -179,11 +179,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     value = 1000  # W/m²
   []
 []
-```
+#+end_src
 
-### 8.3.2 函数 Neumann BC
+*** 8.3.2 函数 Neumann BC
 
-```cpp
+#+begin_src cpp
 [Functions]
   [time_varying_flux]
     type = PiecewiseLinear
@@ -200,15 +200,15 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     function = time_varying_flux
   []
 []
-```
+#+end_src
 
-## 8.4 力学载荷
+** 8.4 力学载荷
 
-### 8.4.1 压力载荷
+*** 8.4.1 压力载荷
 
 **均布压力**：
 
-```cpp
+#+begin_src cpp
 [BCs]
   [pressure_load]
     type = Pressure
@@ -235,11 +235,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     factor = 1e6
   []
 []
-```
+#+end_src
 
 **时间相关压力**：
 
-```cpp
+#+begin_src cpp
 [Functions]
   [pressure_ramp]
     type = PiecewiseLinear
@@ -257,11 +257,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     function = pressure_ramp
   []
 []
-```
+#+end_src
 
 **空间变化的压力**：
 
-```cpp
+#+begin_src cpp
 [Functions]
   [spatial_pressure]
     type = ParsedFunction
@@ -280,13 +280,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     function = spatial_pressure
   []
 []
-```
+#+end_src
 
-### 8.4.2 集中力
+*** 8.4.2 集中力
 
 **使用 NodalKernels**：
 
-```cpp
+#+begin_src cpp
 [NodalKernels]
   [point_load]
     type = ConstantRate
@@ -295,11 +295,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     rate = -1000  # -1000 N
   []
 []
-```
+#+end_src
 
 **使用 DiracKernels**（任意位置）：
 
-```cpp
+#+begin_src cpp
 [DiracKernels]
   [point_force]
     type = ConstantPointSource
@@ -308,11 +308,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     value = -1000  # -1000 N
   []
 []
-```
+#+end_src
 
-### 8.4.3 分布载荷（体力）
+*** 8.4.3 分布载荷（体力）
 
-```cpp
+#+begin_src cpp
 [Kernels]
   [gravity_x]
     type = Gravity
@@ -340,11 +340,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     prop_values = '7850'  # kg/m³
   []
 []
-```
+#+end_src
 
 或使用 BodyForce：
 
-```cpp
+#+begin_src cpp
 [Kernels]
   [body_force]
     type = BodyForce
@@ -352,19 +352,19 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     value = -77000  # ρ*g = 7850 * 9.81 N/m³
   []
 []
-```
+#+end_src
 
-### 8.4.4 热载荷（通过热应变）
+*** 8.4.4 热载荷（通过热应变）
 
 参见第 6、7 章的热弹性耦合内容。
 
-## 8.5 特殊边界条件
+** 8.5 特殊边界条件
 
-### 8.5.1 对称边界条件
+*** 8.5.1 对称边界条件
 
 **平面对称**（垂直于 x 轴的对称面）：
 
-```cpp
+#+begin_src cpp
 [BCs]
   # x 方向位移为 0，其他方向自由
   [symm_x]
@@ -374,11 +374,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     value = 0
   []
 []
-```
+#+end_src
 
 **多个对称面**：
 
-```cpp
+#+begin_src cpp
 [BCs]
   # xz 平面对称
   [symm_xz_y]
@@ -396,11 +396,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     value = 0
   []
 []
-```
+#+end_src
 
 **使用 Action 简化**：
 
-```cpp
+#+begin_src cpp
 [BCs]
   [Periodic]
     [x_periodic]
@@ -409,11 +409,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     []
   []
 []
-```
+#+end_src
 
-### 8.5.2 周期边界条件
+*** 8.5.2 周期边界条件
 
-```cpp
+#+begin_src cpp
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -437,13 +437,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     []
   []
 []
-```
+#+end_src
 
-### 8.5.3 弹性支承
+*** 8.5.3 弹性支承
 
 模拟弹簧约束：$F = k \cdot u$
 
-```cpp
+#+begin_src cpp
 [BCs]
   [elastic_support]
     type = LinearElasticBC
@@ -452,13 +452,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     stiffness = 1e8  # N/m
   []
 []
-```
+#+end_src
 
-### 8.5.4 接触边界条件
+*** 8.5.4 接触边界条件
 
 基本接触（详见第 14 章）：
 
-```cpp
+#+begin_src cpp
 [Contact]
   [contact]
     primary = 'surface1'
@@ -467,15 +467,15 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     penalty = 1e10
   []
 []
-```
+#+end_src
 
-## 8.6 多点约束（MPC）
+** 8.6 多点约束（MPC）
 
-### 8.6.1 线性约束
+*** 8.6.1 线性约束
 
 约束一个节点的自由度依赖于另一个节点：
 
-```cpp
+#+begin_src cpp
 [Constraints]
   [tie_constraint]
     type = EqualValueConstraint
@@ -485,11 +485,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     penalty = 1e10
   []
 []
-```
+#+end_src
 
-### 8.6.2 刚体约束
+*** 8.6.2 刚体约束
 
-```cpp
+#+begin_src cpp
 [Constraints]
   [rigid_body]
     type = RigidBodyModes3D
@@ -499,13 +499,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     secondary_boundaries = 'rigid_surface'
   []
 []
-```
+#+end_src
 
-## 8.7 载荷组合
+** 8.7 载荷组合
 
-### 8.7.1 多种载荷同时作用
+*** 8.7.1 多种载荷同时作用
 
-```cpp
+#+begin_src cpp
 [BCs]
   # 固定约束
   [fix_left]
@@ -542,11 +542,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     value = -9.81
   []
 []
-```
+#+end_src
 
-### 8.7.2 载荷历史
+*** 8.7.2 载荷历史
 
-```cpp
+#+begin_src cpp
 [Functions]
   # 复杂载荷历史
   [load_history]
@@ -565,13 +565,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     function = load_history
   []
 []
-```
+#+end_src
 
-## 8.8 载荷跟随（大变形）
+** 8.8 载荷跟随（大变形）
 
 对于大变形问题，载荷方向可能需要跟随变形：
 
-```cpp
+#+begin_src cpp
 [BCs]
   [follower_pressure]
     type = Pressure
@@ -586,13 +586,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
 [Problem]
   use_displaced_mesh = true
 []
-```
+#+end_src
 
-## 8.9 实际工程载荷
+** 8.9 实际工程载荷
 
-### 8.9.1 风载荷
+*** 8.9.1 风载荷
 
-```cpp
+#+begin_src cpp
 [Functions]
   [wind_pressure]
     type = ParsedFunction
@@ -612,11 +612,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     function = wind_pressure
   []
 []
-```
+#+end_src
 
-### 8.9.2 雪载荷
+*** 8.9.2 雪载荷
 
-```cpp
+#+begin_src cpp
 [Functions]
   [snow_load]
     type = ParsedFunction
@@ -636,11 +636,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     function = snow_load
   []
 []
-```
+#+end_src
 
-### 8.9.3 内压载荷（压力容器）
+*** 8.9.3 内压载荷（压力容器）
 
-```cpp
+#+begin_src cpp
 [BCs]
   [internal_pressure]
     type = Pressure
@@ -650,11 +650,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     factor = 10e6  # 10 MPa
   []
 []
-```
+#+end_src
 
-### 8.9.4 热载荷
+*** 8.9.4 热载荷
 
-```cpp
+#+begin_src cpp
 [Modules/TensorMechanics/Master]
   [all]
     strain = SMALL
@@ -681,13 +681,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     value = 500  # K
   []
 []
-```
+#+end_src
 
-## 8.10 边界条件的验证
+** 8.10 边界条件的验证
 
-### 8.10.1 检查约束充分性
+*** 8.10.1 检查约束充分性
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   # 检查刚体位移
   [avg_disp_x]
@@ -705,13 +705,13 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     variable = disp_z
   []
 []
-```
+#+end_src
 
 如果平均位移趋于无穷，说明约束不足。
 
-### 8.10.2 反力计算
+*** 8.10.2 反力计算
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   [reaction_force_x]
     type = SidesetReaction
@@ -731,62 +731,62 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     boundary = 'fixed_boundary'
   []
 []
-```
+#+end_src
 
 验证：反力总和应等于施加的外载荷。
 
-## 8.11 完整示例
+** 8.11 完整示例
 
 参见 `examples/` 目录：
 - `pressure_vessel.i` - 压力容器分析
 - `cantilever_multiple_loads.i` - 多载荷组合
 - `thermal_mechanical_coupling.i` - 热机耦合
 
-## 8.12 练习
+** 8.12 练习
 
-### 练习 1：基本边界条件
+*** 练习 1：基本边界条件
 创建简单梁模型：
 - 一端固定（所有自由度）
 - 另一端自由
 - 中间施加集中力
 - 验证挠度和反力
 
-### 练习 2：压力载荷
+*** 练习 2：压力载荷
 模拟圆柱壳：
 - 内表面均布压力
 - 轴向约束
 - 计算环向应力
 
-### 练习 3：对称边界条件
+*** 练习 3：对称边界条件
 利用对称性分析四分之一模型：
 - 定义对称边界
 - 与全模型结果对比
 
-### 练习 4：时变载荷
+*** 练习 4：时变载荷
 模拟循环载荷：
 - 正弦变化的压力
 - 计算位移历史
 - 绘制位移-时间曲线
 
-### 练习 5：热机耦合
+*** 练习 5：热机耦合
 分析受热约束结构：
 - 固定边界
 - 温度场
 - 计算热应力
 
-### 练习 6：复杂载荷
+*** 练习 6：复杂载荷
 组合多种载荷：
 - 重力
 - 压力
 - 集中力
 - 温度载荷
 
-## 8.13 故障排除
+** 8.13 故障排除
 
-### 8.13.1 常见错误
+*** 8.13.1 常见错误
 
 **约束不足**：
-```
+#+begin_src
 症状：位移趋于无穷或不收敛
 诊断：
   - 检查是否消除了所有刚体位移模式
@@ -794,10 +794,10 @@ PresetBC 在求解前设置值，对某些问题更稳定：
 解决：
   - 添加必要的位移约束
   - 检查约束是否独立
-```
+#+end_src
 
 **约束过多**：
-```
+#+begin_src
 症状：过约束导致高应力
 诊断：
   - 检查是否有冗余约束
@@ -805,22 +805,22 @@ PresetBC 在求解前设置值，对某些问题更稳定：
 解决：
   - 移除冗余约束
   - 使用适当的支承方式
-```
+#+end_src
 
 **载荷符号错误**：
-```
+#+begin_src
 症状：结果与预期相反
 解决：
   - 检查载荷方向和符号
   - 使用右手坐标系
   - 压力载荷正值通常表示法向向外
-```
+#+end_src
 
-### 8.13.2 调试技巧
+*** 8.13.2 调试技巧
 
 **可视化边界条件**：
 
-```cpp
+#+begin_src cpp
 [AuxVariables]
   [bc_indicator]
     order = CONSTANT
@@ -837,11 +837,11 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     execute_on = initial
   []
 []
-```
+#+end_src
 
 **输出反力**：
 
-```cpp
+#+begin_src cpp
 [Postprocessors]
   [total_reaction_x]
     type = SidesetReaction
@@ -849,15 +849,15 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     boundary = 'all_fixed_boundaries'
   []
 []
-```
+#+end_src
 
-## 8.14 高级话题
+** 8.14 高级话题
 
-### 8.14.1 自适应边界条件
+*** 8.14.1 自适应边界条件
 
 根据求解结果调整边界条件：
 
-```cpp
+#+begin_src cpp
 [Controls]
   [load_control]
     type = ConditionalFunctionEnableControl
@@ -866,17 +866,17 @@ PresetBC 在求解前设置值，对某些问题更稳定：
     enable_objects = 'BCs::updated_load'
   []
 []
-```
+#+end_src
 
-### 8.14.2 用户自定义边界条件
+*** 8.14.2 用户自定义边界条件
 
 可以编写 C++ 代码实现自定义边界条件（高级用户）。
 
-### 8.14.3 弱边界条件
+*** 8.14.3 弱边界条件
 
 使用 Nitsche 方法或罚函数方法实现弱施加的边界条件。
 
-## 8.15 小结
+** 8.15 小结
 
 本章详细介绍了 MOOSE 中的边界条件和载荷：
 
@@ -887,7 +887,7 @@ PresetBC 在求解前设置值，对某些问题更稳定：
 - ✓ 实际工程载荷的模拟
 - ✓ 边界条件的验证方法
 
-## 下一章
+** 下一章
 
 下一章将详细讨论网格生成技术和网格质量控制。
 
