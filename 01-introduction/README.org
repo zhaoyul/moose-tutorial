@@ -6,35 +6,35 @@ MOOSE（Multiphysics Object-Oriented Simulation Environment，多物理场面向
 
 *** 主要特点
 
-- **开源免费**：基于 LGPL 2.1 许可证
-- **面向对象**：采用 C++ 编程，模块化设计
-- **多物理场耦合**：支持热学、力学、流体、化学等多个物理场
-- **高性能计算**：支持大规模并行计算
-- **可扩展性强**：用户可以轻松添加自定义物理模型
+- *开源免费* ：基于 LGPL 2.1 许可证
+- *面向对象* ：采用 C++ 编程，模块化设计
+- *多物理场耦合* ：支持热学、力学、流体、化学等多个物理场
+- *高性能计算* ：支持大规模并行计算
+- *可扩展性强* ：用户可以轻松添加自定义物理模型
 
 ** 1.2 为什么选择 MOOSE？
 
 *** 优势
 
-1. **强大的结构力学能力**
+1. *强大的结构力学能力*
    - 线性和非线性弹性
    - 塑性和蠕变
    - 大变形和几何非线性
    - 接触和断裂力学
 
-2. **多物理场耦合**
+2. *多物理场耦合*
    - 热力耦合
    - 流固耦合
    - 电磁-热-力耦合
    - 相场方法
 
-3. **现代化的数值方法**
+3. *现代化的数值方法*
    - 有限元法（FEM）
    - 自适应网格细化
    - 隐式和显式时间积分
    - 多种求解器选项
 
-4. **活跃的社区**
+4. *活跃的社区*
    - 详细的文档
    - 丰富的示例
    - 活跃的论坛支持
@@ -163,9 +163,8 @@ MOOSE（Multiphysics Object-Oriented Simulation Environment，多物理场面向
 
 在下一章中，我们将详细介绍如何在不同操作系统上安装和配置 MOOSE 框架。
 
----
 
-**参考文献**
+*参考文献*
 
 1. Gaston, D., et al. (2009). "MOOSE: A parallel computational framework for coupled systems of nonlinear equations." Nuclear Engineering and Design, 239(10), 1768-1778.
 2. MOOSE Official Documentation: https://mooseframework.inl.gov
