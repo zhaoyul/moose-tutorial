@@ -1,199 +1,125 @@
 # 项目结构说明
 
-本文档详细说明 MOOSE Tutorial 项目的目录结构和文件组织。
+本文档说明当前仓库的真实目录结构，以及每部分在学习路径中的作用。
 
 ## 目录结构
 
-```
+```text
 moose-tutorial/
-├── .gitignore                    # Git 忽略规则
-├── README.md                     # 项目主文档
-├── PROJECT_STRUCTURE.md          # 本文档
-├── AGENTS.md                     # AI 代理说明 (为空)
+├── README.md                         # 主入口文档（推荐先读）
+├── README.org                        # 指向 README.md 的简短入口
+├── PROJECT_STRUCTURE.md              # 本文档
+├── run_moose_local.sh                # 仓库统一的 MOOSE 启动入口
+├── fix_moose_syntax.py               # 辅助脚本
 │
-├── 01-introduction/              # 第一章：MOOSE 简介
-│   └── README.md                 # 理论说明文档
-│
-├── 02-installation/              # 第二章：安装配置
-│   └── README.md                 # 安装指南
-│
-├── 03-basic-concepts/            # 第三章：基础概念
-│   └── README.md                 # 概念说明
-│
-├── 04-first-example/             # 第四章：第一个示例
-│   ├── README.md                 # 教程说明
+├── 01-introduction/
+│   └── README.org                    # 第一章：MOOSE 简介
+├── 02-installation/
+│   └── README.org                    # 第二章：安装与仓库级自检
+├── 03-basic-concepts/
+│   └── README.org                    # 第三章：基本概念
+├── 04-first-example/
+│   ├── README.org                    # 第四章：第一个例子
 │   └── examples/
-│       └── cantilever_beam.i     # 悬臂梁示例 [提交到 Git]
+│       ├── cantilever_beam.i
+│       └── cantilever_beam_paraview.i
+├── 05-input-file-structure/
+│   └── README.org                    # 第五章：输入文件结构
+├── 06-linear-elasticity/
+│   └── README.org                    # 第六章：线弹性
+├── 07-materials/
+│   └── README.org                    # 第七章：材料
+├── 08-boundary-conditions/
+│   └── README.org                    # 第八章：边界条件
+├── 09-mesh-generation/
+│   └── README.org                    # 第九章：网格
+├── 10-post-processing/
+│   └── README.org                    # 第十章：后处理
 │
-├── 05-input-file-structure/      # 第五章：输入文件结构
-│   └── README.md                 # 语法说明
-│
-├── 06-linear-elasticity/         # 第六章：线弹性力学
-│   ├── README.md                 # 理论说明
-│   └── examples/
-│       ├── axisymmetric_cylinder.i   # 轴对称圆筒 [提交到 Git]
-│       └── orthotropic_plate.i       # 正交各向异性板 [提交到 Git]
-│
-├── 07-materials/                 # 第七章：材料模型
-│   ├── README.md                 # 材料说明
-│   └── examples/
-│       └── temperature_dependent_material.i  # 温度相关材料 [提交到 Git]
-│
-├── 08-boundary-conditions/       # 第八章：边界条件
-│   ├── README.md                 # 边界条件说明
-│   └── examples/
-│       └── cantilever_multiple_loads.i   # 多载荷组合 [提交到 Git]
-│
-├── 09-mesh-generation/           # 第九章：网格生成
-│   ├── README.md                 # 网格生成说明
-│   └── examples/
-│       └── adaptive_refinement.i     # 自适应细化 [提交到 Git]
-│
-├── 10-post-processing/           # 第十章：后处理
-│   ├── README.md                 # 后处理说明
-│   └── examples/
-│       └── complete_postprocessing.i # 完整后处理 [提交到 Git]
-│
-└── complete-simulation/          # 完整仿真流程 (整合章节)
-    ├── README.md                 # 使用文档 [提交到 Git]
-    ├── GMSH_README.md            # Gmsh 使用指南 [提交到 Git]
-    ├── WORKFLOW.md               # 工作流程图 [提交到 Git]
-    ├── FILES_OVERVIEW.md         # 文件说明 [提交到 Git]
-    │
-    ├── cantilever_beam.geo       # Gmsh 几何文件 [提交到 Git]
-    │
-    ├── complete_simulation.i     # 完整仿真输入文件 [提交到 Git]
-    ├── simple_demo.i             # 简化版输入文件 [提交到 Git]
-    ├── simulation_with_gmsh.i    # Gmsh 网格版输入文件 [提交到 Git]
-    ├── simple_moose_test.i       # 测试输入文件 [提交到 Git]
-    │
-    ├── generate_mesh_gmsh.py     # Gmsh Python 脚本 [提交到 Git]
-    ├── postprocess.py            # Python 后处理脚本 [提交到 Git]
-    ├── simple_postprocess.py     # 简化后处理脚本 [提交到 Git]
-    ├── generate_mock_data.py     # 模拟数据生成器 [提交到 Git]
-    │
-    ├── run_simulation.sh         # 标准流程脚本 [提交到 Git]
-    ├── run_gmsh_workflow.sh      # Gmsh 流程脚本 [提交到 Git]
-    │
-    └── postprocessing_results/   # 后处理输出目录 [不提交]
-        └── .gitkeep              # 保留空目录标记 [提交到 Git]
+└── complete-simulation/
+    ├── README.md                     # 端到端流程说明
+    ├── GMSH_README.md               # Gmsh 流程说明
+    ├── WORKFLOW.md                  # ASCII 工作流图
+    ├── FILES_OVERVIEW.md            # 文件概览
+    ├── simple_demo.i                # 默认轻量示例
+    ├── complete_simulation.i        # 完整耦合示例
+    ├── simple_moose_test.i          # Gmsh 流程默认输入文件
+    ├── simulation_with_gmsh.i       # 完整 Gmsh 网格示例
+    ├── run_simulation.sh            # 内置网格流程脚本
+    ├── run_gmsh_workflow.sh         # Gmsh 流程脚本
+    ├── postprocess.py               # 完整后处理脚本
+    ├── simple_postprocess.py        # 简化后处理脚本
+    ├── generate_mock_data.py        # 模拟数据生成
+    ├── generate_mesh_gmsh.py        # Gmsh Python 网格脚本
+    ├── cantilever_beam.geo          # Gmsh 几何文件
+    └── postprocessing_results/      # 示例摘要与运行输出目录
 ```
 
-## 文件分类
+## 如何理解这些目录
 
-### ✅ 应提交到 Git 的文件
+### 章节文档层
 
-#### 1. 源代码和输入文件
-- `*.i` - MOOSE 输入文件 (仿真配置)
-- `*.geo` - Gmsh 几何文件 (网格定义)
-- `*.py` - Python 脚本 (后处理、网格生成)
-- `*.sh` - Bash 脚本 (自动化流程)
+`01-10` 目录主要承担“解释”和“按主题组织知识”的职责。
 
-#### 2. 文档
-- `*.md` - Markdown 文档 (说明、教程)
-- `README*` - 项目说明文件
-- `LICENSE` - 许可证文件 (如适用)
-- `AUTHORS` - 作者信息 (如适用)
+- `01-05` 更偏入门和输入文件阅读
+- `06-10` 更偏专题参考
 
-#### 3. 配置文件
-- `.gitignore` - Git 忽略规则
-- `.gitkeep` - 保留空目录
+除了 `04-first-example/examples/`，这些章节目录目前主要是文档，而不是完整的示例集合。
 
-### ❌ 不应提交到 Git 的文件
+### 可运行示例层
 
-#### 1. 生成的仿真结果
-- `*.e` - Exodus 结果文件 (大型二进制)
-- `*_out.csv` - CSV 数据文件 (运行时生成)
-- `*_out_*.csv` - 时间步数据文件
-- `*.log` - 仿真日志文件
+真正适合作为起点反复运行的文件集中在两处：
 
-#### 2. Gmsh 生成的网格
-- `*.msh` - Gmsh 网格文件 (可从 .geo 生成)
+- `04-first-example/examples/`
+- `complete-simulation/`
 
-#### 3. 临时文件
-- `__pycache__/` - Python 缓存
-- `.jitcache/` - MOOSE JIT 缓存
-- `*.pyc` - Python 字节码
-- `*~` - 编辑器备份文件
+推荐优先级如下：
 
-#### 4. 后处理输出
-- `*.pdf` - 生成的报告
-- `*.png`, `*.jpg` - 图像文件
-- `postprocessing_results/` 目录内容
+1. `04-first-example/examples/cantilever_beam.i`
+2. `complete-simulation/simple_demo.i`
+3. `complete-simulation/complete_simulation.i`
+4. `complete-simulation/simulation_with_gmsh.i`
 
-#### 5. 备份目录
-- `fixed_examples/` - 修复示例的备份
+### 仓库运行入口
 
-## 使用说明
+根目录的 `run_moose_local.sh` 是本仓库的统一入口。它会按顺序尝试：
 
-### 克隆仓库后首次使用
+1. `combined-opt`
+2. `moose-opt`
+3. `MOOSE_LOCAL_BIN`
+
+因此文档中的推荐命令会优先使用这个脚本，而不是假定每个人都有同名二进制。
+
+## 推荐起步方式
 
 ```bash
-# 1. 安装 MOOSE (参考 02-installation/README.md)
-# 2. 安装 Gmsh (可选，用于 Gmsh 网格)
-
-# 3. 运行示例
+# 1. 先跑第一个轻量例子
 cd 04-first-example/examples
-combined-opt -i cantilever_beam.i
+../../run_moose_local.sh -i cantilever_beam.i
 
-# 4. 查看结果
-paraview cantilever_out.e
+# 2. 再跑完整流程目录中的默认轻量示例
+cd ../../complete-simulation
+./run_simulation.sh
+
+# 3. 需要时再切换到完整耦合示例
+INPUT_FILE=complete_simulation.i OUTPUT_PREFIX=complete_simulation_out ./run_simulation.sh
 ```
 
-### 清理生成的文件
+## 哪些文件通常需要提交
 
-```bash
-# 删除所有生成的结果文件 (不包括源代码)
-find . -name "*.e" -delete
-find . -name "*_out.csv" -delete
-find . -name "*.msh" -delete
-find . -name "*.log" -delete
-rm -rf */*/.jitcache/
-```
+适合版本控制的内容：
 
-## Git 工作流
+- 文档：`README.md`、`README.org`、`*.md`、`*.org`
+- 输入文件：`*.i`
+- 脚本：`*.py`、`*.sh`
+- Gmsh 几何：`*.geo`
 
-### 提交更改
+通常不应提交的运行产物：
 
-```bash
-# 查看更改
-git status
+- `*.e`
+- `*.csv`（运行生成的结果文件）
+- `*.msh`
+- `*.log`
+- `postprocessing_results/` 下的新生成报告和图像
 
-# 添加源代码更改
-git add 04-first-example/examples/cantilever_beam.i
-git add complete-simulation/*.i
-git add complete-simulation/*.py
-git add complete-simulation/*.sh
-git add *.md
-
-# 提交
-git commit -m "更新输入文件适配 MOOSE 新版"
-
-# 推送
-git push
-```
-
-### 更新 .gitignore
-
-如需添加新的忽略规则，编辑 `.gitignore` 文件：
-
-```bash
-# 编辑 .gitignore
-vim .gitignore
-
-# 提交更改
-git add .gitignore
-git commit -m "更新 gitignore 规则"
-```
-
-## 文件大小注意事项
-
-- **输入文件 (*.i)**：通常 < 20 KB，适合版本控制
-- **几何文件 (*.geo)**：通常 < 5 KB，适合版本控制
-- **脚本文件 (*.py, *.sh)**：通常 < 25 KB，适合版本控制
-- **结果文件 (*.e)**：通常 1-10 MB，**不适合**版本控制
-- **网格文件 (*.msh)**：通常 100 KB - 1 MB，**不适合**版本控制
-
-## 许可证
-
-本项目遵循 MOOSE 框架的 LGPL 2.1 许可证。
+仓库里保留 `postprocessing_results/` 的少量示例摘要，是为了给学习者提供结果量级参考；这不意味着所有运行产物都应该进入版本库。

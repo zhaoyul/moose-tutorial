@@ -2,6 +2,23 @@
 
 ** 2.1 系统要求
 
+*** 2.1.1 本仓库的最低运行前提
+
+本教程仓库和“从零搭一个 MOOSE 开发环境”不是同一件事。对于本仓库，最低要求其实更直接：
+
+- **必须有一个可运行的 MOOSE 可执行文件**
+  - 优先使用 `combined-opt`
+  - 或者 `moose-opt`
+  - 或者通过环境变量 `MOOSE_LOCAL_BIN` 指定
+- **必须有 Python 3**
+- **推荐安装 `pandas`、`matplotlib`、`numpy`**
+  - 没有这些包时，主仿真仍可能运行成功
+  - 但 `complete-simulation/` 下的后处理脚本会被跳过
+- **只有在跑 Gmsh 流程时才需要 Gmsh**
+- **只有在查看 `.e` 结果时才需要 ParaView**
+
+换句话说，本仓库本身不负责编译一个新的 MOOSE app，它主要复用你已有的 MOOSE 环境。
+
 *** 硬件要求
 - **CPU**：x86_64 或 ARM64 架构
 - **内存**：至少 8 GB RAM（推荐 16 GB 或更多）
@@ -30,6 +47,16 @@ MOOSE 提供多种安装方法：
 2. **预编译二进制包**：快速开始，适合培训
 3. **Docker 容器**：环境隔离，适合快速测试
 4. **源代码编译**：完全控制，适合开发者
+
+*** 2.2.1 针对本仓库的推荐选择
+
+如果目标只是“先把教程跑起来”，建议这样选：
+
+1. **已有可用 MOOSE 环境**：直接跳到本章的仓库级自检
+2. **第一次接触 MOOSE**：优先考虑 Conda 或官方推荐安装方案
+3. **需要自己开发模块或长期维护环境**：再考虑源码编译
+
+不要把“学习教程”与“搭完整开发栈”捆绑成同一个起步动作，否则排错成本会明显上升。
 
 ** 2.3 方法一：使用 Conda 安装（推荐）
 
@@ -73,6 +100,27 @@ cd $CONDA_PREFIX/share/moose/test
 make -j4
 ./run_tests -j4
 #+end_src
+
+*** 2.3.4 安装完成后，用本仓库做一次自检
+
+完成安装后，先不要直接进入复杂示例，先确认本仓库能找到你的 MOOSE：
+
+#+begin_src bash
+cd /path/to/moose-tutorial
+
+# 检查 MOOSE 可执行文件
+command -v combined-opt || command -v moose-opt || echo "需要设置 MOOSE_LOCAL_BIN"
+
+# 检查 Python 版本和可选后处理依赖
+python3 --version
+python3 -c "import pandas, matplotlib, numpy" || echo "后处理依赖尚未安装"
+
+# 运行第一个轻量示例
+cd 04-first-example/examples
+../../run_moose_local.sh -i cantilever_beam.i
+#+end_src
+
+如果这一步能跑通，再进入完整流程目录。
 
 ** 2.4 方法二：从源代码编译
 
@@ -170,6 +218,23 @@ make -j4
 ./run_tests -j4
 #+end_src
 
+*** 2.4.6 让本仓库复用你的本地 MOOSE
+
+如果你的可执行文件不叫 `combined-opt` 或 `moose-opt`，推荐在运行本仓库时显式传入：
+
+#+begin_src bash
+cd /path/to/moose-tutorial
+MOOSE_LOCAL_BIN=/path/to/moose_test-opt ./run_moose_local.sh -i complete-simulation/simple_demo.i
+#+end_src
+
+`run_moose_local.sh` 的查找顺序是：
+
+1. `combined-opt`
+2. `moose-opt`
+3. `MOOSE_LOCAL_BIN`
+
+这比在每个章节里手动替换命令更稳妥。
+
 ** 2.5 方法三：使用 Docker
 
 *** 2.5.1 安装 Docker
@@ -195,7 +260,11 @@ docker pull idaholab/moose
 docker run -it -v $(pwd):/workspace idaholab/moose
 #+end_src
 
+如果你使用 Docker，建议把本仓库挂载进容器后，从仓库根目录运行文档中的命令；否则相对路径会和教程说明不一致。
+
 ** 2.6 创建第一个应用程序
+
+本节适合想继续做 MOOSE 开发的人。如果你的目标只是学习本教程仓库里的输入文件和流程，可以先跳过，直接去第四章和 `complete-simulation/`。
 
 *** 2.6.1 使用 Stork 脚本
 

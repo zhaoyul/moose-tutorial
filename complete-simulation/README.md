@@ -58,20 +58,27 @@ complete-simulation/
 ```bash
 cd complete-simulation
 
-# 确认 MOOSE 命令存在
-which combined-opt
+# 确认仓库入口脚本存在
+test -x ../run_moose_local.sh && echo "找到 ../run_moose_local.sh"
 
 # 确认 Python 可用
 python3 --version
 ```
 
-如果 `combined-opt` 找不到，先回到安装章节，不要直接尝试运行脚本。
+更稳妥的检查方式是：
+
+```bash
+command -v combined-opt || command -v moose-opt || echo "需要设置 MOOSE_LOCAL_BIN"
+python3 -c "import pandas, matplotlib, numpy" || echo "后处理会被跳过"
+```
+
+如果 MOOSE 可执行文件还没准备好，先回到安装章节，不要直接尝试运行脚本。
 
 ### 0.5 推荐先跑简化版
 
 ```bash
 cd complete-simulation
-combined-opt -i simple_demo.i
+../run_moose_local.sh -i simple_demo.i
 ```
 
 第一次只需要确认：
@@ -89,25 +96,43 @@ combined-opt -i simple_demo.i
 # 赋予执行权限
 chmod +x run_simulation.sh
 
-# 运行完整流程（仿真 + 后处理）
+# 运行默认流程（仿真 + 后处理）
 ./run_simulation.sh
 ```
 
-这个脚本会自动执行 4 个阶段：
+默认情况下，这个脚本实际运行的是：
+
+- `INPUT_FILE=simple_demo.i`
+- `OUTPUT_PREFIX=simple_demo_out`
+
+它会自动执行 4 个阶段：
 
 1. 检查依赖
 2. 运行 MOOSE 仿真
 3. 检查输出文件
 4. 运行后处理并生成报告
 
+如果你想直接跑完整版耦合输入文件，而不是默认的轻量示例：
+
+```bash
+INPUT_FILE=complete_simulation.i OUTPUT_PREFIX=complete_simulation_out ./run_simulation.sh
+```
+
 ### 2. 分步运行
 
 ```bash
 # 第1步：运行仿真
-combined-opt -i complete_simulation.i
+../run_moose_local.sh -i complete_simulation.i
 
 # 第2步：运行后处理
 python3 postprocess.py complete_simulation_out
+```
+
+如果你只是想复现脚本默认行为，对应的分步命令是：
+
+```bash
+../run_moose_local.sh -i simple_demo.i
+python3 postprocess.py simple_demo_out
 ```
 
 ### 3. 查看结果
@@ -128,10 +153,12 @@ cat postprocessing_results/complete_simulation_out_summary.txt
 第一次做完整流程时，建议只检查下面几项，不要一开始就试图读懂所有输出：
 
 - 终端出现“完整仿真流程结束”
-- 生成 `complete_simulation_out.e`
-- 生成 `complete_simulation_out.csv`
-- 生成 `postprocessing_results/complete_simulation_out_summary.txt`
+- 对应前缀的 `.e` 文件已生成
+- 对应前缀的 `.csv` 文件已生成
+- `postprocessing_results/` 中生成对应摘要
 - 摘要中能看到最大应力、最大位移、安全系数
+
+注意：如果你用默认脚本直接运行，上面这些文件前缀是 `simple_demo_out`，不是 `complete_simulation_out`。
 
 ## 输入文件详解
 
@@ -242,7 +269,30 @@ postprocessing_results/
 
 **A:** 检查 Python 依赖：
 ```bash
-pip install pandas matplotlib numpy
+python3 -m pip install pandas matplotlib numpy
+```
+
+如果脚本只是提示“跳过后处理”，通常不是仿真失败，而是缺少可选 Python 包。
+
+### Q: 为什么我运行 `./run_simulation.sh` 后没有得到 `complete_simulation_out.*`？
+
+**A:** 因为脚本默认跑的是 `simple_demo.i`。如果你要得到 `complete_simulation_out.*`，需要显式覆盖：
+
+```bash
+INPUT_FILE=complete_simulation.i OUTPUT_PREFIX=complete_simulation_out ./run_simulation.sh
+```
+
+### Q: Gmsh 工作流默认跑的是哪个输入文件？
+
+**A:** `run_gmsh_workflow.sh` 默认使用：
+
+- `INPUT_FILE=simple_moose_test.i`
+- `OUTPUT_PREFIX=moose_result`
+
+如果你想跑完整的 Gmsh 版本，请显式指定：
+
+```bash
+INPUT_FILE=simulation_with_gmsh.i OUTPUT_PREFIX=gmsh_simulation_out ./run_gmsh_workflow.sh
 ```
 
 ### Q: 如何修改载荷？

@@ -1,1 +1,10 @@
 * moose-tutorial
+
+主入口文档已迁移到 [[file:README.md][README.md]]，其中包含：
+
+- 仓库定位和推荐学习顺序
+- 运行本仓库所需的最低前提
+- 第一个例子与完整流程的精确运行命令
+- 教程结构说明和常见故障排查
+
+如果你打算直接动手，优先阅读 [[file:README.md][README.md]] 和 [[file:complete-simulation/README.md][complete-simulation/README.md]]。

@@ -160,5 +160,4 @@
 
 [Problem]
   register_objects_from = 'SolidMechanicsApp'
-  library_path = '/Users/kevinli/sandbox/rc/projects/moose/modules/solid_mechanics/lib'
 []

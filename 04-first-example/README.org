@@ -41,7 +41,7 @@ $$\delta = \frac{1000 \times 1^3}{3 \times 200 \times 10^9 \times 4.167 \times 1
 
 #+begin_src bash
 cd 04-first-example/examples
-combined-opt -i cantilever_beam.i
+../../run_moose_local.sh -i cantilever_beam.i
 #+end_src
 
 运行成功后，先检查这 4 件事：
@@ -52,6 +52,11 @@ combined-opt -i cantilever_beam.i
 - `cantilever_out.csv` 里能看到 `max_disp_z` 和 `max_von_mises`
 
 如果这一步没有通过，优先回到第二章处理环境问题，不要继续往后堆新知识点。
+
+补充说明：
+
+- 本仓库优先通过根目录的 `run_moose_local.sh` 调用 MOOSE，避免每台机器的二进制路径都不一样
+- 如果你的可执行文件不在 `PATH` 中，先设置 `MOOSE_LOCAL_BIN=/path/to/your-opt`
 
 ** 4.2 创建输入文件
 
@@ -339,7 +344,7 @@ make -j4
 #+begin_src bash
 # 推荐：直接运行仓库现成示例
 cd 04-first-example/examples
-combined-opt -i cantilever_beam.i
+../../run_moose_local.sh -i cantilever_beam.i
 
 # 如果你是在自己的 MOOSE app 中复现本章，可改为：
 # ./myapp-opt -i cantilever_beam_force.i
@@ -358,6 +363,12 @@ combined-opt -i cantilever_beam.i
 
 - 是否出现了非线性收敛失败
 - 网格节点数和单元数是否与你设置的 `nx/ny/nz` 大致一致
+
+*** 4.4.4 常见卡点
+
+- 如果命令提示找不到 MOOSE，可先回到第二章检查 `combined-opt`、`moose-opt` 或 `MOOSE_LOCAL_BIN`
+- 如果例子能运行但 ParaView 打不开结果，先确认 `cantilever_out.e` 是否真的生成
+- 如果你在自己的 app 中复现本章，优先保证材料模块和固体力学模块已启用，再去排查输入文件
 - 结果文件名是否与你在 `[Outputs]` 里设置的 `file_base` 一致
 
 ** 4.5 结果后处理
